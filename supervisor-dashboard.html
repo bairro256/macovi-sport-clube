@@ -10,6 +10,7 @@
 <button class="active" data-section="athletes">Atletas</button><button data-section="coaches">Equipa técnica</button><button data-section="events">Eventos</button><button data-section="matches">Jogos e resultados</button><button data-section="standings">Classificações</button>
 </nav>
 <div class="toolbar"><div><span class="eyebrow">Filtro de escalão</span><div class="muted">Escolhe o escalão para consultar e gerir os registos.</div></div><select id="ageFilter"><option value="juvenis">Juvenis · Sub-17</option><option value="juniores">Juniores · Sub-20</option><option value="todos">Todos os escalões</option></select></div>
+<div class="toolbar" id="branchToolbar" hidden><div><span class="eyebrow">Filial do Xadrez</span><div class="muted">Filtra atletas, jogos e classificações por filial.</div></div><select id="branchFilter"><option value="todas">Todas as filiais</option><option>Luanda</option><option>Uíge</option><option>Huíla</option><option>Namibe</option><option>Portugal</option></select></div>
 <section class="workspace"><div class="panel"><h2 id="listTitle">Atletas registados</h2><div class="table-wrap" id="records"><div class="empty">A carregar registos da modalidade...</div></div></div>
 <div class="panel"><h2 id="formTitle">Adicionar atleta</h2><form id="recordForm"><div id="fields" class="field-grid"></div><div class="form-actions"><button id="saveButton" type="submit">Guardar registo</button><button type="button" id="cancelEdit" class="secondary hidden">Cancelar edição</button></div><p class="message" id="formMessage" aria-live="polite"></p></form><div class="notice">Os registos ficam associados exclusivamente à tua modalidade. Os dados pessoais, incluindo data de nascimento, não são apresentados no site público. Antes de publicar, confirma nomes, resultados, datas e fotografias.</div></div></section>
 <div class="foot"><a href="index.html">← Site público</a> · MACOVI SPORT CLUB</div>
@@ -21,7 +22,7 @@ const SUPABASE_KEY='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
 const configs={
  athletes:{table:'athletes',title:'Atletas',singular:'atleta',fields:[
-  ['full_name','Nome completo','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['birth_date','Data de nascimento (privada)','date',false],['sex','Sexo','select',false,['masculino','feminino','outro']],['photo_path','Fotografia (JPG, PNG ou WEBP · máx. 5 MB)','file',false],['sport_role','Posição / função','text',false],['jersey_number','Número de camisola','number',false],['height_cm','Altura (cm)','number',false],['chess_title','Título de xadrez','text',false],['fide_rating','Rating FIDE','number',false],['national_rating','Rating nacional','number',false],['board_number','Tabuleiro / mesa','number',false],['club_name','Clube','text',false],['biography','Biografia / notas','textarea',false],['active','Activo no site público','checkbox',false]]},
+  ['full_name','Nome completo','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['branch','Filial do Xadrez','select',true,['Luanda','Uíge','Huíla','Namibe','Portugal']],['birth_date','Data de nascimento (privada)','date',false],['sex','Sexo','select',false,['masculino','feminino','outro']],['photo_path','Fotografia (JPG, PNG ou WEBP · máx. 5 MB)','file',false],['sport_role','Posição / função','text',false],['jersey_number','Número de camisola','number',false],['height_cm','Altura (cm)','number',false],['chess_title','Título de xadrez','text',false],['fide_rating','Rating FIDE','number',false],['national_rating','Rating nacional','number',false],['board_number','Tabuleiro / mesa','number',false],['club_name','Clube','text',false],['biography','Biografia / notas','textarea',false],['active','Activo no site público','checkbox',false]]},
  coaches:{table:'coaches',title:'Equipa técnica',singular:'membro da equipa técnica',fields:[
   ['full_name','Nome completo','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['role_title','Função / cargo','text',true],['photo_path','Fotografia (JPG, PNG ou WEBP · máx. 5 MB)','file',false],['biography','Biografia','textarea',false],['active','Activo no site público','checkbox',false]]},
  events:{table:'events',title:'Eventos',singular:'evento',fields:[
@@ -51,7 +52,7 @@ async function boot(){
  if(error||!p||p.role!=='supervisor'||p.active!==true||!p.modality_id){await supabase.auth.signOut();location.replace('supervisor.html?access=denied');return;}profile=p;
  const {data:m,error:me}=await supabase.from('modalities').select('id,name,slug,active').eq('id',p.modality_id).eq('active',true).maybeSingle();
  if(me||!m){$('modalityName').textContent='A modalidade atribuída está inactiva ou indisponível.';return;}modality=m;
- $('welcome').textContent='Olá, '+(p.full_name||'Supervisor');$('modalityName').textContent=m.name+' · Acesso exclusivo à modalidade atribuída';await loadRows();
+ $('welcome').textContent='Olá, '+(p.full_name||'Supervisor');$('modalityName').textContent=m.name+' · Acesso exclusivo à modalidade atribuída';$('branchToolbar').hidden=m.slug!=='xadrez';await loadRows();
 }
 async function loadRows(){
  const cfg=configs[section];$('listTitle').textContent=cfg.title+' · '+modality.name;
@@ -62,17 +63,18 @@ async function loadRows(){
   if(section==='events')query=query.or('age_group.eq.'+age+',age_group.is.null');
   else query=query.eq('age_group',age);
  }
+ if(modality.slug==='xadrez'&&['athletes','matches','standings'].includes(section)){const branch=$('branchFilter').value;if(branch!=='todas')query=query.eq('branch',branch);}
  const {data,error}=await query;
  if(error){$('records').innerHTML='<div class="empty">Não foi possível carregar os registos: '+esc(error.message)+'</div>';return;}
  rows=data||[];renderRows();renderForm();
 }
 function renderRows(){
  const cfg=configs[section];if(!rows.length){$('records').innerHTML='<div class="empty">Ainda não existem registos nesta secção e escalão. Usa o formulário ao lado para adicionar o primeiro.</div>';return;}
- let heads=section==='athletes'?['Nome','Escalão','Estado']:section==='coaches'?['Nome','Função','Escalão']:section==='events'?['Evento','Data','Estado']:section==='matches'?['Adversário','Data / resultado','Estado']:['Competição','Equipa','Posição / pontos'];
+ let heads=section==='athletes'?['Nome','Escalão','Filial','Estado']:section==='coaches'?['Nome','Função','Escalão']:section==='events'?['Evento','Data','Estado']:section==='matches'?(modality.slug==='xadrez'?['Adversário','Data / resultado','Filial','Estado']:['Adversário','Data / resultado','Estado']):(modality.slug==='xadrez'?['Competição','Equipa','Filial','Posição / pontos']:['Competição','Equipa','Posição / pontos']);
  let html='<table><thead><tr>'+heads.map(x=>'<th>'+x+'</th>').join('')+'<th>Acções</th></tr></thead><tbody>';
  html+=rows.map(r=>{
  const photo=r.photo_path?'<img src="'+esc(r.photo_path)+'" alt="" loading="lazy" style="width:38px;height:38px;object-fit:cover;border-radius:50%;vertical-align:middle;margin-right:8px">':'';
- let cells=section==='athletes'?[photo+esc(r.full_name),labelAge(r.age_group),r.active?'Activo':'Oculto']:section==='coaches'?[photo+esc(r.full_name),r.role_title,labelAge(r.age_group)]:section==='events'?[r.title+(r.age_group?' · '+labelAge(r.age_group):' · Todos os escalões'),dateValue(r.starts_at),r.published?'Publicado':'Rascunho']:section==='matches'?[r.opponent,dateValue(r.starts_at)+' · '+(r.macovi_score??'—')+' : '+(r.opponent_score??'—'),r.published?'Publicado':(r.result||'Rascunho')]:[r.competition,r.team_name,(r.position??'—')+'º · '+r.points+' pts'];
+ let cells=section==='athletes'?[photo+esc(r.full_name),labelAge(r.age_group),r.branch||'—',r.active?'Activo':'Oculto']:section==='coaches'?[photo+esc(r.full_name),r.role_title,labelAge(r.age_group)]:section==='events'?[r.title+(r.age_group?' · '+labelAge(r.age_group):' · Todos os escalões'),dateValue(r.starts_at),r.published?'Publicado':'Rascunho']:section==='matches'?(modality.slug==='xadrez'?[r.opponent,dateValue(r.starts_at)+' · '+(r.macovi_score??'—')+' : '+(r.opponent_score??'—'),r.branch||'—',r.published?'Publicado':(r.result||'Rascunho')]:[r.opponent,dateValue(r.starts_at)+' · '+(r.macovi_score??'—')+' : '+(r.opponent_score??'—'),r.published?'Publicado':(r.result||'Rascunho')]):(modality.slug==='xadrez'?[r.competition,r.team_name,r.branch||'—',(r.position??'—')+'º · '+r.points+' pts']:[r.competition,r.team_name,(r.position??'—')+'º · '+r.points+' pts']);
  return '<tr>'+cells.map((x,i)=>'<td>'+(i===0&&(section==='athletes'||section==='coaches')?x:esc(x))+'</td>').join('')+'<td class="actions"><button class="secondary" data-action="edit" data-id="'+r.id+'">Editar</button><button class="danger" data-action="delete" data-id="'+r.id+'">Apagar</button></td></tr>';
  }).join('')+'</tbody></table>';$('records').innerHTML=html;
 }
@@ -80,7 +82,7 @@ function renderForm(){
  const cfg=configs[section];$('formTitle').textContent=(editingId?'Editar ':'Adicionar ')+cfg.singular;
  const row=editingId?rows.find(x=>x.id===editingId):null;
  $('fields').innerHTML=visibleFields().map(f=>{
- const [key,name,type,required,opts]=f,v=row?.[key];
+ const [key,name,type,required,opts]=f,v=row?.[key]??(key==='branch'&&modality.slug==='xadrez'&&$('branchFilter').value!=='todas'?$('branchFilter').value:null);
  if(type==='checkbox'){const checked=v===undefined?(key==='active'&&(section==='athletes'||section==='coaches')):v===true;return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(checked?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';}
  let input='';
  if(type==='file')input='<input id="f_'+key+'" type="file" accept="image/jpeg,image/png,image/webp">'+(v?'<div class="muted">Fotografia actual: <a href="'+esc(v)+'" target="_blank" rel="noopener">ver imagem</a></div>':'');
@@ -129,6 +131,7 @@ $('records').addEventListener('click',async e=>{
 $('cancelEdit').addEventListener('click',()=>{editingId=null;renderForm();$('formMessage').textContent='Edição cancelada.';});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-section]');if(!b||b.dataset.section===section)return;section=b.dataset.section;editingId=null;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));loadRows();});
 $('ageFilter').addEventListener('change',()=>{editingId=null;loadRows();});
+$('branchFilter').addEventListener('change',()=>{editingId=null;loadRows();});
 $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('supervisor.html');});
 supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)location.replace('supervisor.html');});
 boot();
