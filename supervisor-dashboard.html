@@ -34,7 +34,16 @@ const configs={
 let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[],uploadedPhotoUrl=null;
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':'Sem escalão';}
+function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':'Todos os escalões';}
+function visibleFields(){
+ const fields=configs[section].fields;
+ if(section!=='athletes'||!modality)return fields;
+ const hidden=modality.slug==='xadrez'
+  ? ['sport_role','jersey_number','height_cm']
+  : ['chess_title','fide_rating','national_rating','board_number','club_name'];
+ if(modality.slug!=='basquetebol')hidden.push('height_cm');
+ return fields.filter(f=>!hidden.includes(f[0]));
+}
 function dateValue(v){if(!v)return '';const d=new Date(v);return isNaN(d)?'':d.toLocaleString('pt-AO',{dateStyle:'short',timeStyle:'short'});}
 async function boot(){
  const {data:{session}}=await supabase.auth.getSession();if(!session){location.replace('supervisor.html');return;}user=session.user;
@@ -48,7 +57,11 @@ async function loadRows(){
  const cfg=configs[section];$('listTitle').textContent=cfg.title+' · '+modality.name;
  $('records').innerHTML='<div class="empty">A carregar...</div>';
  let query=supabase.from(cfg.table).select('*').eq('modality_id',modality.id).order('created_at',{ascending:false});
- const age=$('ageFilter').value;if(age!=='todos')query=query.eq('age_group',age);
+ const age=$('ageFilter').value;
+ if(age!=='todos'){
+  if(section==='events')query=query.or('age_group.eq.'+age+',age_group.is.null');
+  else query=query.eq('age_group',age);
+ }
  const {data,error}=await query;
  if(error){$('records').innerHTML='<div class="empty">Não foi possível carregar os registos: '+esc(error.message)+'</div>';return;}
  rows=data||[];renderRows();renderForm();
@@ -58,16 +71,17 @@ function renderRows(){
  let heads=section==='athletes'?['Nome','Escalão','Estado']:section==='coaches'?['Nome','Função','Escalão']:section==='events'?['Evento','Data','Estado']:section==='matches'?['Adversário','Data / resultado','Estado']:['Competição','Equipa','Posição / pontos'];
  let html='<table><thead><tr>'+heads.map(x=>'<th>'+x+'</th>').join('')+'<th>Acções</th></tr></thead><tbody>';
  html+=rows.map(r=>{
- let cells=section==='athletes'?[r.full_name,labelAge(r.age_group),r.active?'Activo':'Oculto']:section==='coaches'?[r.full_name,r.role_title,labelAge(r.age_group)]:section==='events'?[r.title,dateValue(r.starts_at),r.published?'Publicado':'Rascunho']:section==='matches'?[r.opponent,dateValue(r.starts_at)+' · '+(r.macovi_score??'—')+' : '+(r.opponent_score??'—'),r.published?'Publicado':(r.result||'Rascunho')]:[r.competition,r.team_name,(r.position??'—')+'º · '+r.points+' pts'];
- return '<tr>'+cells.map(x=>'<td>'+esc(x)+'</td>').join('')+'<td class="actions"><button class="secondary" data-action="edit" data-id="'+r.id+'">Editar</button><button class="danger" data-action="delete" data-id="'+r.id+'">Apagar</button></td></tr>';
+ const photo=r.photo_path?'<img src="'+esc(r.photo_path)+'" alt="" loading="lazy" style="width:38px;height:38px;object-fit:cover;border-radius:50%;vertical-align:middle;margin-right:8px">':'';
+ let cells=section==='athletes'?[photo+esc(r.full_name),labelAge(r.age_group),r.active?'Activo':'Oculto']:section==='coaches'?[photo+esc(r.full_name),r.role_title,labelAge(r.age_group)]:section==='events'?[r.title+(r.age_group?' · '+labelAge(r.age_group):' · Todos os escalões'),dateValue(r.starts_at),r.published?'Publicado':'Rascunho']:section==='matches'?[r.opponent,dateValue(r.starts_at)+' · '+(r.macovi_score??'—')+' : '+(r.opponent_score??'—'),r.published?'Publicado':(r.result||'Rascunho')]:[r.competition,r.team_name,(r.position??'—')+'º · '+r.points+' pts'];
+ return '<tr>'+cells.map((x,i)=>'<td>'+(i===0&&(section==='athletes'||section==='coaches')?x:esc(x))+'</td>').join('')+'<td class="actions"><button class="secondary" data-action="edit" data-id="'+r.id+'">Editar</button><button class="danger" data-action="delete" data-id="'+r.id+'">Apagar</button></td></tr>';
  }).join('')+'</tbody></table>';$('records').innerHTML=html;
 }
 function renderForm(){
  const cfg=configs[section];$('formTitle').textContent=(editingId?'Editar ':'Adicionar ')+cfg.singular;
  const row=editingId?rows.find(x=>x.id===editingId):null;
- $('fields').innerHTML=cfg.fields.map(f=>{
+ $('fields').innerHTML=visibleFields().map(f=>{
  const [key,name,type,required,opts]=f,v=row?.[key];
- if(type==='checkbox')return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(v===true?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';
+ if(type==='checkbox'){const checked=v===undefined?(key==='active'&&(section==='athletes'||section==='coaches')):v===true;return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(checked?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';}
  let input='';
  if(type==='file')input='<input id="f_'+key+'" type="file" accept="image/jpeg,image/png,image/webp">'+(v?'<div class="muted">Fotografia actual: <a href="'+esc(v)+'" target="_blank" rel="noopener">ver imagem</a></div>':'');
  else if(type==='textarea')input='<textarea id="f_'+key+'" '+(required?'required':'')+'>'+esc(v||'')+'</textarea>';
@@ -80,9 +94,12 @@ function renderForm(){
 }
 function formPayload(){
  const cfg=configs[section],data={modality_id:modality.id};
- for(const f of cfg.fields){const [key,,type]=f,el=$('f_'+key);if(type==='file')continue;if(type==='checkbox')data[key]=el.checked;else{let v=el.value.trim();if(type==='number')v=v===''?null:Number(v);else if(type==='datetime-local')v=v?new Date(v).toISOString():null;else if(v==='')v=null;data[key]=v;}}
+ for(const f of visibleFields()){const [key,,type]=f,el=$('f_'+key);if(type==='file')continue;if(type==='checkbox')data[key]=el.checked;else{let v=el.value.trim();if(type==='number')v=v===''?null:Number(v);else if(type==='datetime-local')v=v?new Date(v).toISOString():null;else if(v==='')v=null;data[key]=v;}}
  if(!editingId)data.created_by=user.id;data.updated_by=user.id;
  if(section==='athletes'&&!editingId)data.display_order=0;
+ if(section==='matches'&&data.macovi_score!==null&&data.opponent_score!==null&&data.result==='por_realizar'){
+  data.result=data.macovi_score>data.opponent_score?'vitoria':data.macovi_score<data.opponent_score?'derrota':'empate';
+ }
  return data;
 }
 $('recordForm').addEventListener('submit',async e=>{
