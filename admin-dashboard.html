@@ -14,7 +14,7 @@
 <div><label for="supervisorEmail">Gmail / endereço de e-mail</label><input id="supervisorEmail" type="email" autocomplete="email" required></div>
 <div><label for="supervisorModality">Modalidade atribuída</label><select id="supervisorModality" required><option value="">A carregar modalidades...</option></select></div>
 </div><button id="inviteButton" type="submit">Gerar convite individual ↗</button><p class="message muted" id="inviteMessage" aria-live="polite"></p></form>
-<div class="invite-result" id="inviteResult"><strong>Identificação e código de activação — mostrar apenas uma vez</strong><div class="invite-code" id="supervisorNumber"></div><div class="invite-code" id="inviteCode"></div><p class="muted" id="inviteInfo"></p><button type="button" id="copyInvite">Copiar código</button> <a class="btn" href="supervisor-activate.html">Abrir activação</a><p class="muted">Envia o código apenas ao supervisor indicado. O convite expira em 7 dias e fica inutilizável depois da primeira activação.</p></div>
+<div class="invite-result" id="inviteResult"><strong>Identificação e código de activação — mostrar apenas uma vez</strong><div class="invite-code" id="supervisorNumber"></div><div class="invite-code" id="inviteCode"></div><p class="muted" id="inviteInfo"></p><button type="button" id="copyInvite">Copiar dados de acesso</button> <a class="btn" href="supervisor-activate.html">Abrir activação</a><p class="muted">Envia o código apenas ao supervisor indicado. O código expira em 7 dias e fica inutilizável depois da primeira activação.</p></div>
 <h3 class="section-title">Supervisores registados</h3><div class="table-wrap"><table><thead><tr><th>Modalidade</th><th>N.º Supervisor</th><th>Supervisor</th><th>Estado</th><th>Acções</th></tr></thead><tbody id="supervisors"><tr><td colspan="5" class="muted">A consultar registos...</td></tr></tbody></table></div>
 <div class="notice"><strong>Protecção de acesso</strong><p>Os códigos são gerados no servidor, guardados apenas como hash e apresentados uma única vez. A activação exige correspondência entre número, Gmail e código. O acesso à modalidade é atribuído pelo servidor.</p></div></section>
 <h2 class="section-title">Histórico de auditoria</h2><section class="panel"><div class="top"><div><strong>Últimas acções registadas</strong><p class="muted">Alterações a atletas, treinadores, eventos, jogos, classificações e gestão de supervisores.</p></div><span class="pill">Registo automático</span></div><div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Responsável</th><th>Acção</th><th>Registo afectado</th></tr></thead><tbody id="auditRows"><tr><td colspan="4" class="muted">A carregar histórico...</td></tr></tbody></table></div></section>
@@ -71,8 +71,8 @@ document.getElementById('supervisors').addEventListener('click',async e=>{
  const button=e.target.closest('button[data-action]');if(!button)return;
  button.disabled=true;const action=button.dataset.action;
  if(action==='revoke'){
-  const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'revoke',modality_id:button.dataset.modality}});
-  if(error||!data?.ok)alert(data?.error||'Não foi possível revogar o convite.');
+  const {data,error}=await supabase.rpc('revoke_supervisor_access_codes',{p_modality_id:button.dataset.modality});
+  if(error||!data?.ok)alert(error?.message||data?.error||'Não foi possível revogar os códigos.');
   else alert(data.message);
  }else if(action==='toggle'){
   const nextActive=button.dataset.active!=='true';
