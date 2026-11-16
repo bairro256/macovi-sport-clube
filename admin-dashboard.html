@@ -103,6 +103,7 @@ async function loadDashboard(profile){
  const modalities=mods.data||[], supervisors=sups.data||[];
  chessModalityId=modalities.find(m=>m.slug==='xadrez')?.id||null;
  document.getElementById('newsModality').innerHTML='<option value="">Notícia geral do clube</option>'+modalities.map(m=>'<option value="'+m.id+'">'+escapeHtml(m.name)+'</option>').join('');
+ if(chessModalityId)document.getElementById('newsModality').value=chessModalityId;
 
  document.getElementById('supervisorModality').innerHTML='<option value="">Selecciona a modalidade</option>'+modalities.filter(m=>m.active).map(m=>'<option value="'+m.id+'">'+escapeHtml(m.name)+'</option>').join('');
  document.getElementById('modalityCount').textContent=modalities.length;
