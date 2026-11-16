@@ -9,7 +9,7 @@ const url=p=>p+'?m='+encodeURIComponent(slug),date=v=>v?new Date(v).toLocaleDate
 if(!names[slug]){$('#content')?.replaceChildren(Object.assign(document.createElement('p'),{textContent:'Modalidade não identificada. Volta à página principal do clube.'}));}
 else{
  document.title=title+' | MACOVI SPORT CLUB';$('#modName').textContent=title;$('#modName2').textContent=title;$('#heroModName')&&($('#heroModName').textContent=title);$('#intro').textContent=intros[slug];
- $('#mainLinks').innerHTML=links.map(([label,path,key])=>'<a href="'+url(path)+'" '+(page===key?'class="active"':'')+'>'+label+'</a>').join('');
+ $('#mainLinks').innerHTML='<a class="back-modalities" href="index.html#modalidades">← Todas as modalidades</a>'+links.map(([label,path,key])=>'<a href="'+url(path)+'" '+(page===key?'class="active"':'')+'>'+label+'</a>').join('');
  $('#menuButton').addEventListener('click',()=>$('#mainLinks').classList.toggle('open'));
  $('#brandHome').href=url('modalidade.html');document.querySelectorAll('a[href^="modalidade"]').forEach(a=>{const target=a.getAttribute('href').split('?')[0];a.href=url(target)});
  const mr=await db.from('modalities').select('id').eq('slug',slug).eq('active',true).maybeSingle();
