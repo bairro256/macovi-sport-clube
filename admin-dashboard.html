@@ -27,8 +27,8 @@
    <div><label for="newsModality">Publicar em</label><select id="newsModality"><option value="">Notícia geral do clube</option></select></div>
    <div class="wide"><label for="newsSummary">Resumo (máx. 360 caracteres)</label><input id="newsSummary" maxlength="360"></div>
    <div class="wide"><label for="newsBody">Texto da publicação</label><textarea id="newsBody" required minlength="10"></textarea></div>
-   <div class="wide"><label for="newsImage">Fotografia (JPG, PNG ou WEBP · máx. 5 MB)</label><input id="newsImage" type="file" accept="image/jpeg,image/png,image/webp"></div>
-   <div class="wide"><label for="newsVideo">Vídeo da notícia (MP4 recomendado, WEBM ou MOV · máx. 40 MB)</label><input id="newsVideo" type="file" accept="video/mp4,video/webm,video/quicktime"><p class="news-video-note">O vídeo será carregado com envio retomável para reduzir falhas em ligações móveis. MP4 é o formato mais compatível.</p><div class="news-upload-progress" id="videoProgress" hidden><span id="videoProgressBar"></span></div></div>
+   <div class="wide"><label for="newsImage">Fotografia de capa (obrigatória quando anexares um vídeo · JPG, PNG ou WEBP · máx. 5 MB)</label><input id="newsImage" type="file" accept="image/jpeg,image/png,image/webp"></div>
+   <div class="wide"><label for="newsVideo">Vídeo da notícia (MP4 recomendado, WEBM ou MOV · máx. 40 MB)</label><input id="newsVideo" type="file" accept="video/mp4,video/webm,video/quicktime"><p class="news-video-note">Selecciona também uma fotografia de capa. Ela será mostrada antes do play para que nenhum vídeo apareça com um ecrã preto. MP4 é o formato mais compatível.</p><div class="news-upload-progress" id="videoProgress" hidden><span id="videoProgressBar"></span></div></div>
    <div class="wide"><label><input id="newsPublished" type="checkbox" checked style="width:auto;margin-right:8px"> Publicar imediatamente no site</label></div>
   </div>
   <div class="news-actions"><button id="newsSave" type="submit">Guardar notícia</button><button id="newsCancel" class="secondary" type="button" hidden>Cancelar edição</button></div>
@@ -57,37 +57,6 @@ async function loadNews(){
  box.innerHTML=(data||[]).map(n=>'<article class="news-item">'+(n.image_path?'<img src="'+escapeHtml(supabase.storage.from('macovi-photos').getPublicUrl(n.image_path).data.publicUrl)+'" alt="">':'')+'<div class="news-item-main"><small>'+escapeHtml(n.category)+' · '+(n.published?'<span class="news-status">Publicada</span>':'Rascunho')+(n.video_path?' · Vídeo anexado':'')+'</small><strong>'+escapeHtml(n.title)+'</strong><p>'+escapeHtml(n.summary||'Sem resumo')+'</p></div><div class="news-item-actions"><button class="small-action" data-news-edit="'+n.id+'">Editar</button><button class="small-action danger" data-news-delete="'+n.id+'">Eliminar</button></div></article>').join('')||'<div class="muted">Ainda não existem notícias. Cria a primeira publicação acima.</div>';
 }
 
-async function createVideoThumbnail(file){
- const video=document.createElement('video'),url=URL.createObjectURL(file);
- video.muted=true;video.playsInline=true;video.preload='auto';video.src=url;
- try{
-  await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('Este vídeo não permite criar uma pré-visualização neste formato. Escolhe uma fotografia de capa.'));});
-  const duration=Number.isFinite(video.duration)?video.duration:0;
-  const candidates=[0.5,1,1.5,2,3,4,5,duration*0.2,duration*0.35].filter((t,i,a)=>duration>0&&t<duration-0.12&&a.indexOf(t)===i);
-  if(!candidates.length)throw new Error('O vídeo é demasiado curto para criar uma capa automática. Escolhe uma fotografia de capa.');
-  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
-  let bestData=null,bestScore=0;
-  for(const time of candidates){
-   await new Promise(resolve=>{let settled=false;const done=()=>{if(settled)return;settled=true;video.removeEventListener('seeked',done);resolve();};video.addEventListener('seeked',done,{once:true});try{video.currentTime=time;}catch(e){done();}setTimeout(done,5000);});
-   if(!video.videoWidth||!video.videoHeight)continue;
-   const scale=Math.min(1,960/video.videoWidth);canvas.width=Math.round(video.videoWidth*scale);canvas.height=Math.round(video.videoHeight*scale);
-   try{ctx.drawImage(video,0,0,canvas.width,canvas.height);}catch(e){continue;}
-   const sample=document.createElement('canvas');sample.width=32;sample.height=18;const sctx=sample.getContext('2d',{willReadFrequently:true});sctx.drawImage(canvas,0,0,32,18);
-   const pixels=sctx.getImageData(0,0,32,18).data;let light=0,light2=0;
-   for(let i=0;i<pixels.length;i+=4){const y=0.2126*pixels[i]+0.7152*pixels[i+1]+0.0722*pixels[i+2];light+=y;light2+=y*y;}
-   const count=pixels.length/4;light/=count;const variance=Math.max(0,light2/count-light*light);
-   const score=light+Math.sqrt(variance)*1.5;
-   if(score>bestScore){bestScore=score;bestData=canvas.toDataURL('image/jpeg',0.88);}
-   if(light>35)break;
-  }
-  if(!bestData||bestScore<3)throw new Error('O vídeo não forneceu fotogramas utilizáveis para criar a capa. Tenta exportá-lo em MP4 (H.264) ou escolhe uma fotografia de capa.');
-  const img=new Image();img.src=bestData;await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});
-  const out=document.createElement('canvas');out.width=img.naturalWidth;out.height=img.naturalHeight;out.getContext('2d').drawImage(img,0,0);
-  const blob=await new Promise(resolve=>out.toBlob(resolve,'image/jpeg',0.88));
-  if(!blob)throw new Error('Não foi possível gerar a imagem de capa.');
-  return blob;
- }finally{URL.revokeObjectURL(url);video.removeAttribute('src');video.load();}
-}
 async function uploadNewsVideo(file,path){
  const {error}=await supabase.storage.from('macovi-photos').upload(path,file,{
   contentType:file.type,
@@ -104,6 +73,7 @@ async function saveNews(e){
  const title=document.getElementById('newsTitle').value.trim(),body=document.getElementById('newsBody').value.trim(),published=document.getElementById('newsPublished').checked;
  if(file&&(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024)){msg.textContent='A fotografia deve ser JPG, PNG ou WEBP e não pode ultrapassar 5 MB.';return;}
  if(videoFile&&(!['video/mp4','video/webm','video/quicktime'].includes(videoFile.type)||videoFile.size>40*1024*1024)){msg.textContent='O vídeo deve ser MP4, WEBM ou MOV e não pode ultrapassar 40 MB.';return;}
+  if(videoFile&&!file){msg.textContent='Para publicar um vídeo sem ecrã preto, selecciona também uma fotografia de capa no campo Fotografia.';document.getElementById('newsImage').focus();return;}
  btn.disabled=true;msg.textContent='A guardar publicação...';
  let imagePath=null,videoPath=null;
  const mediaRoot=document.getElementById('newsModality').value||chessModalityId;
@@ -114,7 +84,7 @@ async function saveNews(e){
   const {error:uploadError}=await supabase.storage.from('macovi-photos').upload(imagePath,file,{contentType:file.type,upsert:false});
   if(uploadError){msg.textContent='Falha ao carregar fotografia: '+uploadError.message;btn.disabled=false;return;}
  }
- if(videoFile){const ext=videoFile.type==='video/mp4'?'mp4':videoFile.type==='video/webm'?'webm':'mov';videoPath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;try{msg.textContent='A preparar uma capa automática para o vídeo...';if(!imagePath){const thumbnail=await createVideoThumbnail(videoFile);imagePath=mediaRoot+'/news/'+crypto.randomUUID()+'-capa.jpg';const {error:thumbError}=await supabase.storage.from('macovi-photos').upload(imagePath,thumbnail,{contentType:'image/jpeg',cacheControl:'3600',upsert:false});if(thumbError)throw thumbError;}msg.textContent='A carregar vídeo e imagem de capa...';await uploadNewsVideo(videoFile,videoPath);}catch(uploadError){msg.textContent='Não foi possível preparar a capa ou carregar o vídeo: '+uploadError.message;btn.disabled=false;return;}}
+ if(videoFile){const ext=videoFile.type==='video/mp4'?'mp4':videoFile.type==='video/webm'?'webm':'mov';videoPath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;try{msg.textContent='A carregar vídeo e fotografia de capa...';await uploadNewsVideo(videoFile,videoPath);}catch(uploadError){msg.textContent='Falha ao carregar vídeo: '+uploadError.message;btn.disabled=false;return;}}
  const payload={title,category:document.getElementById('newsCategory').value,summary:document.getElementById('newsSummary').value.trim()||null,body,modality_id:document.getElementById('newsModality').value||null,published,published_at:published?new Date().toISOString():null,updated_by:currentProfile.user_id||null};
  if(imagePath)payload.image_path=imagePath;if(videoPath)payload.video_path=videoPath;
  let result;
