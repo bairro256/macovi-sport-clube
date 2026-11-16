@@ -36,3 +36,16 @@ html[data-theme="light"] .development-head p{color:#52645a!important}
 html[data-theme="light"] .feature .arrow{color:#936d20!important;border-color:#c7a45b!important}
 html[data-theme="light"] .feature .num,html[data-theme="light"] .sport-story h3,html[data-theme="light"] .sport-icon{color:#087b48!important}
 html[data-theme="light"] [style*="background"]{background:#e8eee9!important;color:#17251e!important}
+
+
+/* Contacto e logótipos sociais discretos no rodapé */
+.macovi-footer-social{display:flex;align-items:center;justify-content:flex-end;gap:15px;flex-wrap:wrap;margin-top:10px}
+.macovi-footer-email{font-size:11px;color:var(--muted,#a6b8ae);text-decoration:none;letter-spacing:.02em}
+.macovi-footer-email:hover{color:#19c875}
+.macovi-social-icons{display:flex;align-items:center;gap:8px}
+.macovi-social-icons a{width:25px;height:25px;display:inline-flex;align-items:center;justify-content:center;color:#a6b8ae;opacity:.82;transition:color .2s,opacity .2s,transform .2s}
+.macovi-social-icons a:hover{color:#19c875;opacity:1;transform:translateY(-2px)}
+.macovi-social-icons svg{width:16px;height:16px;fill:currentColor}
+html[data-theme="light"] .macovi-footer-email{color:#52645a}
+html[data-theme="light"] .macovi-social-icons a{color:#52645a}
+@media(max-width:650px){.macovi-footer-social{justify-content:flex-start;gap:12px;margin-top:12px}.macovi-footer-email{font-size:10px}.macovi-social-icons a{width:24px;height:24px}}
