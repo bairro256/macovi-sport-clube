@@ -39,9 +39,9 @@
 <h2 class="section-title">Histórico de auditoria</h2><section class="panel"><div class="top"><div><strong>Últimas acções registadas</strong><p class="muted">Alterações a atletas, treinadores, eventos, jogos, classificações e gestão de supervisores.</p></div><span class="pill">Registo automático</span></div><div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Responsável</th><th>Acção</th><th>Registo afectado</th></tr></thead><tbody id="auditRows"><tr><td colspan="4" class="muted">A carregar histórico...</td></tr></tbody></table></div></section>
 <div class="foot"><a href="index.html">← Voltar ao site público</a> · MACOVI SPORT CLUB</div>
 </div></main>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
-import * as tus from 'https://esm.sh/tus-js-client@4.3.1';
 const SUPABASE_URL='https://jblxmqoodtfhediqegar.supabase.co';
 const SUPABASE_KEY='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
