@@ -11,7 +11,7 @@ else{
  document.title=title+' | MACOVI SPORT CLUB';$('#modName').textContent=title;$('#modName2').textContent=title;$('#intro').textContent=intros[slug];
  $('#mainLinks').innerHTML=links.map(([label,path,key])=>'<a href="'+url(path)+'" '+(page===key?'class="active"':'')+'>'+label+'</a>').join('');
  $('#menuButton').addEventListener('click',()=>$('#mainLinks').classList.toggle('open'));
- $('#brandHome').href=url('modalidade.html');
+ $('#brandHome').href=url('modalidade.html');document.querySelectorAll('a[href^="modalidade"]').forEach(a=>{const target=a.getAttribute('href').split('?')[0];a.href=url(target)});
  const mr=await db.from('modalities').select('id').eq('slug',slug).eq('active',true).maybeSingle();
  let athletes=[],coaches=[],events=[],matches=[],standings=[],articles=[];
  if(mr.data){
