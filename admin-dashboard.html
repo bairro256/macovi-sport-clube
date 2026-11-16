@@ -66,20 +66,21 @@ async function createVideoThumbnail(file){
   const candidates=[0.5,1,1.5,2,3,4,5,duration*0.2,duration*0.35].filter((t,i,a)=>duration>0&&t<duration-0.12&&a.indexOf(t)===i);
   if(!candidates.length)throw new Error('O vídeo é demasiado curto para criar uma capa automática. Escolhe uma fotografia de capa.');
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
-  let bestData=null,bestLight=0;
+  let bestData=null,bestScore=0;
   for(const time of candidates){
-   await new Promise(resolve=>{const done=()=>{video.removeEventListener('seeked',done);resolve();};video.addEventListener('seeked',done,{once:true});video.currentTime=time;setTimeout(()=>{video.removeEventListener('seeked',done);resolve();},2500);});
+   await new Promise(resolve=>{let settled=false;const done=()=>{if(settled)return;settled=true;video.removeEventListener('seeked',done);resolve();};video.addEventListener('seeked',done,{once:true});try{video.currentTime=time;}catch(e){done();}setTimeout(done,5000);});
    if(!video.videoWidth||!video.videoHeight)continue;
    const scale=Math.min(1,960/video.videoWidth);canvas.width=Math.round(video.videoWidth*scale);canvas.height=Math.round(video.videoHeight*scale);
-   ctx.drawImage(video,0,0,canvas.width,canvas.height);
+   try{ctx.drawImage(video,0,0,canvas.width,canvas.height);}catch(e){continue;}
    const sample=document.createElement('canvas');sample.width=32;sample.height=18;const sctx=sample.getContext('2d',{willReadFrequently:true});sctx.drawImage(canvas,0,0,32,18);
-   const pixels=sctx.getImageData(0,0,32,18).data;let light=0;
-   for(let i=0;i<pixels.length;i+=4)light+=0.2126*pixels[i]+0.7152*pixels[i+1]+0.0722*pixels[i+2];
-   light/=pixels.length/4;
-   if(light>bestLight){bestLight=light;bestData=canvas.toDataURL('image/jpeg',0.88);}
-   if(light>24)break;
+   const pixels=sctx.getImageData(0,0,32,18).data;let light=0,light2=0;
+   for(let i=0;i<pixels.length;i+=4){const y=0.2126*pixels[i]+0.7152*pixels[i+1]+0.0722*pixels[i+2];light+=y;light2+=y*y;}
+   const count=pixels.length/4;light/=count;const variance=Math.max(0,light2/count-light*light);
+   const score=light+Math.sqrt(variance)*1.5;
+   if(score>bestScore){bestScore=score;bestData=canvas.toDataURL('image/jpeg',0.88);}
+   if(light>35)break;
   }
-  if(!bestData||bestLight<12)throw new Error('Não foi encontrada uma imagem visível no vídeo. Escolhe uma fotografia de capa para evitar uma pré-visualização preta.');
+  if(!bestData||bestScore<3)throw new Error('O vídeo não forneceu fotogramas utilizáveis para criar a capa. Tenta exportá-lo em MP4 (H.264) ou escolhe uma fotografia de capa.');
   const img=new Image();img.src=bestData;await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});
   const out=document.createElement('canvas');out.width=img.naturalWidth;out.height=img.naturalHeight;out.getContext('2d').drawImage(img,0,0);
   const blob=await new Promise(resolve=>out.toBlob(resolve,'image/jpeg',0.88));
