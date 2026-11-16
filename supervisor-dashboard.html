@@ -21,7 +21,7 @@ const SUPABASE_KEY='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
 const configs={
  athletes:{table:'athletes',title:'Atletas',singular:'atleta',fields:[
-  ['full_name','Nome completo','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['birth_date','Data de nascimento (privada)','date',false],['sex','Sexo','select',false,['masculino','feminino','outro']],['photo_path','URL da fotografia','url',false],['sport_role','Posição / função','text',false],['jersey_number','Número de camisola','number',false],['height_cm','Altura (cm)','number',false],['chess_title','Título de xadrez','text',false],['fide_rating','Rating FIDE','number',false],['national_rating','Rating nacional','number',false],['board_number','Tabuleiro / mesa','number',false],['club_name','Clube','text',false],['biography','Biografia / notas','textarea',false],['active','Activo no site público','checkbox',false]]},
+  ['full_name','Nome completo','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['birth_date','Data de nascimento (privada)','date',false],['sex','Sexo','select',false,['masculino','feminino','outro']],['photo_path','Fotografia (JPG, PNG ou WEBP · máx. 5 MB)','file',false],['sport_role','Posição / função','text',false],['jersey_number','Número de camisola','number',false],['height_cm','Altura (cm)','number',false],['chess_title','Título de xadrez','text',false],['fide_rating','Rating FIDE','number',false],['national_rating','Rating nacional','number',false],['board_number','Tabuleiro / mesa','number',false],['club_name','Clube','text',false],['biography','Biografia / notas','textarea',false],['active','Activo no site público','checkbox',false]]},
  coaches:{table:'coaches',title:'Equipa técnica',singular:'membro da equipa técnica',fields:[
   ['full_name','Nome completo','text',true],['age_group','Escalão','select',false,['juvenis','juniores']],['role_title','Função / cargo','text',true],['photo_path','URL da fotografia','url',false],['biography','Biografia','textarea',false],['active','Activo no site público','checkbox',false]]},
  events:{table:'events',title:'Eventos',singular:'evento',fields:[
@@ -31,7 +31,7 @@ const configs={
  standings:{table:'standings',title:'Classificações',singular:'linha de classificação',fields:[
   ['competition','Competição','text',true],['age_group','Escalão','select',false,['juvenis','juniores']],['team_name','Equipa','text',true],['position','Posição','number',false],['played','Jogos disputados','number',true],['wins','Vitórias','number',true],['draws','Empates','number',true],['losses','Derrotas','number',true],['points','Pontos','number',true],['season','Época','text',false],['published','Publicar no site','checkbox',false]]}
 };
-let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[];
+let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[],uploadedPhotoUrl=null;
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':'Sem escalão';}
@@ -69,7 +69,8 @@ function renderForm(){
  const [key,name,type,required,opts]=f,v=row?.[key];
  if(type==='checkbox')return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(v===true?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';
  let input='';
- if(type==='textarea')input='<textarea id="f_'+key+'" '+(required?'required':'')+'>'+esc(v||'')+'</textarea>';
+ if(type==='file')input='<input id="f_'+key+'" type="file" accept="image/jpeg,image/png,image/webp">'+(v?'<div class="muted">Fotografia actual: <a href="'+esc(v)+'" target="_blank" rel="noopener">ver imagem</a></div>':'');
+ else if(type==='textarea')input='<textarea id="f_'+key+'" '+(required?'required':'')+'>'+esc(v||'')+'</textarea>';
  else if(type==='select')input='<select id="f_'+key+'" '+(required?'required':'')+'><option value="">Seleccionar</option>'+opts.map(o=>'<option value="'+esc(o)+'" '+(v===o?'selected':'')+'>'+esc(o==='juvenis'?'Juvenis · Sub-17':o==='juniores'?'Juniores · Sub-20':o==='masculino'?'Masculino':o==='feminino'?'Feminino':o==='outro'?'Outro':o)+'</option>').join('')+'</select>';
  else {let value=v??'';if(type==='datetime-local'&&value){const d=new Date(value);value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
  input='<input id="f_'+key+'" type="'+type+'" value="'+esc(value)+'" '+(required?'required':'')+'>';}
@@ -79,14 +80,25 @@ function renderForm(){
 }
 function formPayload(){
  const cfg=configs[section],data={modality_id:modality.id};
- for(const f of cfg.fields){const [key,,type]=f,el=$('f_'+key);if(type==='checkbox')data[key]=el.checked;else{let v=el.value.trim();if(type==='number')v=v===''?null:Number(v);else if(type==='datetime-local')v=v?new Date(v).toISOString():null;else if(v==='')v=null;data[key]=v;}}
+ for(const f of cfg.fields){const [key,,type]=f,el=$('f_'+key);if(type==='file')continue;if(type==='checkbox')data[key]=el.checked;else{let v=el.value.trim();if(type==='number')v=v===''?null:Number(v);else if(type==='datetime-local')v=v?new Date(v).toISOString():null;else if(v==='')v=null;data[key]=v;}}
  if(!editingId)data.created_by=user.id;data.updated_by=user.id;
  if(section==='athletes'&&!editingId)data.display_order=0;
  return data;
 }
 $('recordForm').addEventListener('submit',async e=>{
  e.preventDefault();const btn=$('saveButton');btn.disabled=true;$('formMessage').textContent='A guardar...';
- const payload=formPayload(),cfg=configs[section];
+ const cfg=configs[section];
+ const photoInput=$('f_photo_path');
+ if(photoInput?.files?.length){
+  const file=photoInput.files[0];
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){$('formMessage').textContent='A imagem deve ser JPG, PNG ou WEBP e não pode ultrapassar 5 MB.';btn.disabled=false;return;}
+  const ext=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':'webp';
+  const path=modality.id+'/'+section+'/'+crypto.randomUUID()+'.'+ext;
+  const {error:uploadError}=await supabase.storage.from('macovi-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+  if(uploadError){$('formMessage').textContent='Erro ao enviar fotografia: '+uploadError.message;btn.disabled=false;return;}
+  const {data:urlData}=supabase.storage.from('macovi-photos').getPublicUrl(path);uploadedPhotoUrl=urlData.publicUrl;
+ }
+ const payload=formPayload();if(uploadedPhotoUrl){payload.photo_path=uploadedPhotoUrl;uploadedPhotoUrl=null;}
  let result=editingId?await supabase.from(cfg.table).update(payload).eq('id',editingId).eq('modality_id',modality.id):await supabase.from(cfg.table).insert(payload);
  if(result.error){$('formMessage').textContent='Erro ao guardar: '+result.error.message;}
  else{$('formMessage').textContent='Registo guardado com sucesso.';editingId=null;await loadRows();}
