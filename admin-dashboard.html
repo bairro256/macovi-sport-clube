@@ -14,9 +14,9 @@
 <div><label for="supervisorEmail">Gmail / endereço de e-mail</label><input id="supervisorEmail" type="email" autocomplete="email" required></div>
 <div><label for="supervisorModality">Modalidade atribuída</label><select id="supervisorModality" required><option value="">A carregar modalidades...</option></select></div>
 </div><button id="inviteButton" type="submit">Gerar convite individual ↗</button><p class="message muted" id="inviteMessage" aria-live="polite"></p></form>
-<div class="invite-result" id="inviteResult"><strong>Código de activação — mostrar apenas uma vez</strong><div class="invite-code" id="inviteCode"></div><p class="muted" id="inviteInfo"></p><button type="button" id="copyInvite">Copiar código</button> <a class="btn" href="supervisor-activate.html">Abrir activação</a><p class="muted">Envia o código apenas ao supervisor indicado. O convite expira em 7 dias e fica inutilizável depois da primeira activação.</p></div>
-<h3 class="section-title">Supervisores registados</h3><div class="table-wrap"><table><thead><tr><th>Modalidade</th><th>Supervisor</th><th>Estado</th><th>Acções</th></tr></thead><tbody id="supervisors"><tr><td colspan="3" class="muted">A consultar registos...</td></tr></tbody></table></div>
-<div class="notice"><strong>Protecção de acesso</strong><p>Os códigos são gerados no servidor, guardados apenas como hash e apresentados uma única vez. A activação exige correspondência entre Gmail e código. O acesso à modalidade é atribuído pelo servidor.</p></div></section>
+<div class="invite-result" id="inviteResult"><strong>Identificação e código de activação — mostrar apenas uma vez</strong><div class="invite-code" id="supervisorNumber"></div><div class="invite-code" id="inviteCode"></div><p class="muted" id="inviteInfo"></p><button type="button" id="copyInvite">Copiar código</button> <a class="btn" href="supervisor-activate.html">Abrir activação</a><p class="muted">Envia o código apenas ao supervisor indicado. O convite expira em 7 dias e fica inutilizável depois da primeira activação.</p></div>
+<h3 class="section-title">Supervisores registados</h3><div class="table-wrap"><table><thead><tr><th>Modalidade</th><th>N.º Supervisor</th><th>Supervisor</th><th>Estado</th><th>Acções</th></tr></thead><tbody id="supervisors"><tr><td colspan="5" class="muted">A consultar registos...</td></tr></tbody></table></div>
+<div class="notice"><strong>Protecção de acesso</strong><p>Os códigos são gerados no servidor, guardados apenas como hash e apresentados uma única vez. A activação exige correspondência entre número, Gmail e código. O acesso à modalidade é atribuído pelo servidor.</p></div></section>
 <h2 class="section-title">Histórico de auditoria</h2><section class="panel"><div class="top"><div><strong>Últimas acções registadas</strong><p class="muted">Alterações a atletas, treinadores, eventos, jogos, classificações e gestão de supervisores.</p></div><span class="pill">Registo automático</span></div><div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Responsável</th><th>Acção</th><th>Registo afectado</th></tr></thead><tbody id="auditRows"><tr><td colspan="4" class="muted">A carregar histórico...</td></tr></tbody></table></div></section>
 <div class="foot"><a href="index.html">← Voltar ao site público</a> · MACOVI SPORT CLUB</div>
 </div></main>
@@ -31,7 +31,7 @@ async function loadDashboard(profile){
  document.getElementById('welcome').textContent='Bem-vindo, '+(profile.full_name||'Administrador Sénior');
  const [mods,sups,athletes]=await Promise.all([
   supabase.from('modalities').select('id,slug,name,active').order('name'),
-  supabase.from('profiles').select('user_id,full_name,modality_id,active').eq('role','supervisor'),
+  supabase.from('profiles').select('user_id,full_name,supervisor_number,modality_id,active').eq('role','supervisor'),
   supabase.from('athletes').select('id',{count:'exact',head:true})
  ]);
  if(mods.error){document.getElementById('sports').innerHTML='<div class="sport">Erro ao carregar modalidades: '+escapeHtml(mods.error.message)+'. Confirma a ligação à base de dados.</div>';document.getElementById('modalityCount').textContent='Erro';return;}
@@ -41,8 +41,8 @@ async function loadDashboard(profile){
  document.getElementById('supervisorCount').textContent=sups.error?'—':supervisors.length;
  document.getElementById('athleteCount').textContent=athletes.error?'—':(athletes.count??0);
  document.getElementById('sports').innerHTML=modalities.map(m=>'<article class="sport"><h3>'+escapeHtml(m.name)+'</h3><small>'+escapeHtml(m.slug)+'</small><p class="state">'+(m.active?'Modalidade activa':'Modalidade inactiva')+'</p></article>').join('');
- document.getElementById('supervisors').innerHTML=modalities.map(m=>{const s=supervisors.find(x=>x.modality_id===m.id);return '<tr><td>'+escapeHtml(m.name)+'</td><td>'+(s?escapeHtml(s.full_name||'Conta atribuída'):'Ainda não atribuído')+'</td><td>'+(s?(s.active?'<span class="pill">Activo</span>':'<span class="pill">Suspenso</span>'):'<span class="muted">Sem supervisor</span>')+'</td><td>'+(s?'<button class="small-action" data-action="toggle" data-user="'+s.user_id+'" data-modality="'+m.id+'" data-active="'+s.active+'">'+(s.active?'Suspender':'Reactivar')+'</button>'+(s.active?'<button class="small-action" data-action="recover" data-user="'+s.user_id+'" data-modality="'+m.id+'">Redefinir senha</button>':'')+'<button class="small-action" data-action="replace" data-user="'+s.user_id+'" data-modality="'+m.id+'">Substituir</button>':'')+'<button class="small-action" data-action="revoke" data-modality="'+m.id+'">Revogar convite</button></td></tr>';}).join('');
- if(sups.error)document.getElementById('supervisors').innerHTML='<tr><td colspan="4">Não foi possível consultar supervisores.</td></tr>';
+ document.getElementById('supervisors').innerHTML=modalities.map(m=>{const s=supervisors.find(x=>x.modality_id===m.id);return '<tr><td>'+escapeHtml(m.name)+'</td><td>'+(s?escapeHtml(s.supervisor_number||'—'):'—')+'</td><td>'+(s?escapeHtml(s.full_name||'Conta atribuída'):'Ainda não atribuído')+'</td><td>'+(s?(s.active?'<span class="pill">Activo</span>':'<span class="pill">Suspenso</span>'):'<span class="muted">Sem supervisor</span>')+'</td><td>'+(s?'<button class="small-action" data-action="toggle" data-user="'+s.user_id+'" data-modality="'+m.id+'" data-active="'+s.active+'">'+(s.active?'Suspender':'Reactivar')+'</button>'+(s.active?'<button class="small-action" data-action="recover" data-user="'+s.user_id+'" data-modality="'+m.id+'">Redefinir senha</button>':'')+'<button class="small-action" data-action="replace" data-user="'+s.user_id+'" data-modality="'+m.id+'">Substituir</button>':'')+'<button class="small-action" data-action="revoke" data-modality="'+m.id+'">Revogar convite</button></td></tr>';}).join('');
+ if(sups.error)document.getElementById('supervisors').innerHTML='<tr><td colspan="5">Não foi possível consultar supervisores.</td></tr>';
  await loadAudit();
 }
 async function loadAudit(){
@@ -101,20 +101,25 @@ document.getElementById('inviteForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const button=document.getElementById('inviteButton'),msg=document.getElementById('inviteMessage'),result=document.getElementById('inviteResult');
  button.disabled=true;button.textContent='A gerar convite...';msg.textContent='';result.classList.remove('show');
- const payload={full_name:document.getElementById('supervisorName').value.trim(),email:document.getElementById('supervisorEmail').value.trim(),modality_id:document.getElementById('supervisorModality').value};
- const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:payload});
- let functionError=null;
- if(error?.context && typeof error.context.clone==='function'){
-  try{functionError=await error.context.clone().json();}catch{}
- }
+ const {data,error}=await supabase.rpc('create_supervisor_access_code',{
+  p_full_name:document.getElementById('supervisorName').value.trim(),
+  p_email:document.getElementById('supervisorEmail').value.trim(),
+  p_modality_id:document.getElementById('supervisorModality').value
+ });
  if(error||!data?.ok){
-  const reason=data?.error||functionError?.error||functionError?.message||error?.message||'Erro desconhecido na função de convites.';
-  const code=functionError?.code?(' Código: '+functionError.code+'.'):'';
-  msg.textContent=reason+code;
- }else{document.getElementById('inviteCode').textContent=data.code;document.getElementById('inviteInfo').textContent=data.email+' · '+data.modality+' · Expira: '+new Date(data.expires_at).toLocaleString('pt-PT');result.classList.add('show');msg.textContent=data.message;document.getElementById('supervisorName').value='';document.getElementById('supervisorEmail').value='';document.getElementById('supervisorModality').value='';}
+  msg.textContent=error?.message||data?.error||'Não foi possível gerar o código de supervisor.';
+ }else{
+  document.getElementById('supervisorNumber').textContent=data.supervisor_number;
+  document.getElementById('inviteCode').textContent=data.code;
+  document.getElementById('inviteInfo').textContent=data.email+' · '+data.modality+' · Expira: '+new Date(data.expires_at).toLocaleString('pt-PT');
+  result.classList.add('show');msg.textContent=data.message;
+  document.getElementById('supervisorName').value='';
+  document.getElementById('supervisorEmail').value='';
+  document.getElementById('supervisorModality').value='';
+ }
  button.disabled=false;button.textContent='Gerar convite individual ↗';
 });
-document.getElementById('copyInvite').addEventListener('click',async()=>{const code=document.getElementById('inviteCode').textContent;try{await navigator.clipboard.writeText(code);document.getElementById('copyInvite').textContent='Código copiado';}catch{document.getElementById('copyInvite').textContent='Selecciona e copia o código';}});
+document.getElementById('copyInvite').addEventListener('click',async()=>{const code='N.º '+document.getElementById('supervisorNumber').textContent+' | Código '+document.getElementById('inviteCode').textContent;try{await navigator.clipboard.writeText(code);document.getElementById('copyInvite').textContent='Dados copiados';}catch{document.getElementById('copyInvite').textContent='Selecciona e copia o código';}});
 document.getElementById('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('admin.html')});
 checkSession();
 </script></body></html>
