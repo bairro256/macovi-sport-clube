@@ -61,7 +61,8 @@ function uploadNewsVideo(file,path){
  return new Promise(async(resolve,reject)=>{
   const {data:{session},error}=await supabase.auth.getSession();
   if(error||!session?.access_token){reject(error||new Error('Sessão expirada. Volta a iniciar sessão.'));return;}
-  const upload=new tus.Upload(file,{
+  if(!window.tus?.Upload){reject(new Error('Biblioteca de envio de vídeo não carregou. Actualiza a página e tenta novamente.'));return;}
+  const upload=new window.tus.Upload(file,{
    endpoint:'https://jblxmqoodtfhediqegar.storage.supabase.co/storage/v1/upload/resumable',
    retryDelays:[0,3000,5000,10000,20000],
    headers:{authorization:'Bearer '+session.access_token,'x-upsert':'false'},
