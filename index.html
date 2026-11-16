@@ -40,6 +40,21 @@
 .brand{cursor:pointer}
 .brand:focus-visible{outline:2px solid var(--green2);outline-offset:5px;border-radius:4px}
 @media(max-width:650px){.access-dialog{padding:24px 18px}}
+
+/* Notícias em destaque — página inicial */
+.home-news{background:linear-gradient(180deg,#081f17,#061a14);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.home-news-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.home-news-card{display:block;text-align:left;color:inherit;background:linear-gradient(145deg,#102d22,#091e16);border:1px solid var(--line);padding:22px;min-width:0;transition:transform .3s,border-color .3s}
+.home-news-card:hover{transform:translateY(-4px);border-color:var(--green)}
+.home-news-card.featured{grid-row:span 2;padding:0;overflow:hidden}
+.home-news-card img{width:100%;max-height:310px;aspect-ratio:16/9;object-fit:cover;display:block}
+.home-news-copy{padding:22px}
+.home-news-card small{display:block;color:var(--green2);font-size:10px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.home-news-card h3{font-size:clamp(18px,2.4vw,27px);line-height:1.12;text-transform:uppercase;margin:0 0 10px}
+.home-news-card:not(.featured) h3{font-size:17px}
+.home-news-card p{color:var(--muted);font-size:13px;margin:0}
+.home-news-empty{padding:24px;border:1px solid var(--line);background:#0b241a;color:var(--muted);font-size:13px}
+@media(max-width:650px){.home-news-grid{grid-template-columns:1fr}.home-news-card.featured{grid-row:auto}.home-news-card img{max-height:220px}}
 </style></head>
 <body>
 <div class="topbar"><div class="shell"><span>ANGOLA · DESDE 26 DE JULHO DE 1999</span><span>DESPORTO · FORMAÇÃO · COMUNIDADE</span></div></div>
@@ -57,7 +72,7 @@
 <button class="feature" data-view="modalidades" style="text-align:left;color:inherit"><span class="num">01 / EQUIPAS</span><h3>As modalidades</h3><p>Conhece as cinco modalidades e os respectivos escalões.</p><span class="arrow">↗</span></button>
 <button class="feature" data-view="competicoes" style="text-align:left;color:inherit"><span class="num">02 / COMPETIÇÃO</span><h3>Jogos e resultados</h3><p>Consulta calendários, resultados e classificações oficiais.</p><span class="arrow">↗</span></button>
 <button class="feature" data-view="club" style="text-align:left;color:inherit"><span class="num">03 / IDENTIDADE</span><h3>A nossa história</h3><p>Descobre a missão, os valores e a origem do club.</p><span class="arrow">↗</span></button>
-</div></div></section></div>
+</div><section class="section home-news" id="noticias-destaque"><div class="shell"><div class="section-head"><div><div class="eyebrow">Actualidade · Todas as modalidades</div><h2>Notícias em<br>destaque.</h2></div><p>O que acontece no MACOVI SPORT CLUB. Cada publicação mantém a identidade da sua modalidade.</p></div><div class="home-news-grid" id="homeNewsList"><div class="home-news-empty">A carregar as notícias oficiais do clube...</div></div></div></section></div>
 <div class="view" id="view-club"><section class="page-hero"><div class="shell"><div class="eyebrow">A nossa identidade</div><h1 class="page-title">Uma história construída<br>com a comunidade.</h1><p>Desde 26 de Julho de 1999, o desporto como instrumento de formação, inclusão e transformação da juventude.</p></div></section><section class="section"><div class="shell club-layout"><div class="club-image"><img src="assets/macovi.webp" alt="Emblema oficial do Macovi Sport Club"></div><div class="club-text"><div class="eyebrow">Fundação · 26.07.1999</div><h2 class="page-title">MACOVI SPORT CLUB</h2><p>Fundado a 26 de Julho de 1999 por Correia Victor, o Macovi Sport Club nasceu com uma missão que vai além da competição: usar o desporto como ferramenta de formação humana, inclusão e combate à delinquência juvenil.</p><p>O club acredita no potencial de cada jovem e trabalha para criar oportunidades, hábitos saudáveis, sentido de responsabilidade e referências positivas dentro e fora do campo.</p><div class="value-grid"><div class="value">Disciplina e respeito</div><div class="value">Formação da juventude</div><div class="value">Espírito de equipa</div><div class="value">Compromisso comunitário</div></div></div></div></section></div>
 <div class="view" id="view-modalidades"><section class="page-hero"><div class="shell"><div class="eyebrow">Formação e competição</div><h1 class="page-title">Cinco modalidades.<br>Uma só identidade.</h1><p>Selecciona uma modalidade para consultar os seus escalões. Alterna entre Juvenis e Juniores para ver a área correspondente.</p></div></section><section class="section"><div class="shell"><div class="cards" id="sportcards">
 <article class="sport-card" data-sport="Xadrez"><div class="sport-icon">♟</div><h3>Xadrez</h3><p>Estratégia, concentração e pensamento crítico.</p><button>Ver escalões ↗</button></article>
@@ -154,6 +169,15 @@ const initial=location.hash.replace('#','');if(['home','club','modalidades','com
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const sb=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY');
+
+const escNews=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function loadHomepageNews(){
+ const target=document.getElementById('homeNewsList');if(!target)return;
+ const {data,error}=await sb.from('news').select('id,title,category,summary,image_path,published_at,created_at,modality_id,modalities(name,slug)').eq('published',true).not('modality_id','is',null).order('published_at',{ascending:false}).order('created_at',{ascending:false}).limit(7);
+ if(error){console.warn('Notícias da página inicial:',error.message);target.innerHTML='<div class="home-news-empty">Não foi possível carregar as notícias neste momento.</div>';return;}
+ if(!data?.length){target.innerHTML='<div class="home-news-empty">Ainda não existem notícias publicadas. Acompanhe esta área para conhecer as próximas novidades do clube.</div>';return;}
+ target.innerHTML=data.map((n,i)=>{const mod=Array.isArray(n.modalities)?n.modalities[0]:n.modalities,slug=mod?.slug,href=slug==='xadrez'?'xadrez-noticias.html#noticia-'+n.id:slug?'modalidade-noticias.html?m='+encodeURIComponent(slug)+'#noticia-'+n.id:'',date=n.published_at||n.created_at,when=date?new Date(date).toLocaleDateString('pt-AO'):'',photo=n.image_path?sb.storage.from('macovi-photos').getPublicUrl(n.image_path).data.publicUrl:null;return '<a class="home-news-card '+(i===0?'featured':'')+'" href="'+escNews(href)+'">'+(photo?'<img src="'+escNews(photo)+'" alt="" loading="lazy">':'')+'<div class="home-news-copy"><small>'+escNews(mod?.name||'MACOVI SPORT CLUB')+' · '+escNews(n.category||'Notícia')+(when?' · '+when:'')+'</small><h3>'+escNews(n.title)+'</h3><p>'+escNews(n.summary||'Consulta a publicação completa na área desta modalidade.')+'</p></div></a>';}).join('');
+}
 const blankAge=()=>({plantel:[],equipaTecnica:[],jogos:[],classificacao:[]});
 function mapAthlete(a){
  const dados={'Título / categoria':a.chess_title,'Rating FIDE':a.fide_rating,'Rating nacional':a.national_rating,'Tabuleiro / mesa':a.board_number,'Clube':a.club_name,'Número de camisola':a.jersey_number,'Posição':a.sport_role,'Altura':a.height_cm?String(a.height_cm)+' cm':null};
@@ -188,5 +212,6 @@ async function loadClubData(){
 }
 document.getElementById('publicBranch').addEventListener('change',e=>{currentBranch=e.target.value;renderAge();});
 loadClubData().catch(err=>{console.error('MACOVI public data:',err);clubData={modalidades:{}};renderAge();renderSportNews();});
+loadHomepageNews();
 </script>
 </body></html>
