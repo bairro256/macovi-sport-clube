@@ -81,7 +81,7 @@
 @media(max-width:650px){.home-news-grid{grid-template-columns:1fr}.home-news-card.featured{grid-row:auto}.home-news-card img{max-height:220px}}
 
 .development-area{margin-top:34px;padding:28px;background:radial-gradient(ellipse at 100% 0,rgba(199,164,91,.08),transparent 45%),linear-gradient(145deg,#10251e,#091a15);border:1px solid rgba(199,164,91,.2);border-top:2px solid var(--gold)}.development-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:18px}.development-head h2{font-size:clamp(20px,3vw,28px);margin:9px 0 0;text-transform:uppercase}.development-head p{max-width:440px;color:var(--muted);font-size:12px;margin:0}.development-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.development-item{padding:16px;background:#071a13;border:1px solid var(--line)}.development-item strong{display:block;font-size:12px}.development-item small{display:block;margin-top:7px;color:var(--gold);font-size:9px;letter-spacing:.13em;font-weight:900}@media(max-width:650px){.development-area{padding:20px}.development-head{display:block}.development-head p{margin-top:10px}.development-grid{grid-template-columns:1fr 1fr}}
-</style></head>
+</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/app-icon.svg"><link rel="stylesheet" href="assets/pwa.css"></head>
 <body>
 <div class="topbar"><div class="shell"><span>ANGOLA · DESDE 26 DE JULHO DE 1999</span><span>DESPORTO · FORMAÇÃO · COMUNIDADE</span></div></div>
 <header class="header"><div class="shell nav">
@@ -244,4 +244,4 @@ document.getElementById('publicBranch').addEventListener('change',e=>{currentBra
 loadClubData().catch(err=>{console.error('MACOVI public data:',err);clubData={modalidades:{}};renderAge();renderSportNews();});
 loadHomepageNews();
 </script>
-</body></html>
+<script src="assets/pwa.js" defer></script></body></html>
