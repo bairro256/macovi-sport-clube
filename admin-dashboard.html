@@ -17,6 +17,7 @@
 <div class="invite-result" id="inviteResult"><strong>Código de activação — mostrar apenas uma vez</strong><div class="invite-code" id="inviteCode"></div><p class="muted" id="inviteInfo"></p><button type="button" id="copyInvite">Copiar código</button> <a class="btn" href="supervisor-activate.html">Abrir activação</a><p class="muted">Envia o código apenas ao supervisor indicado. O convite expira em 7 dias e fica inutilizável depois da primeira activação.</p></div>
 <h3 class="section-title">Supervisores registados</h3><div class="table-wrap"><table><thead><tr><th>Modalidade</th><th>Supervisor</th><th>Estado</th><th>Acções</th></tr></thead><tbody id="supervisors"><tr><td colspan="3" class="muted">A consultar registos...</td></tr></tbody></table></div>
 <div class="notice"><strong>Protecção de acesso</strong><p>Os códigos são gerados no servidor, guardados apenas como hash e apresentados uma única vez. A activação exige correspondência entre Gmail e código. O acesso à modalidade é atribuído pelo servidor.</p></div></section>
+<h2 class="section-title">Histórico de auditoria</h2><section class="panel"><div class="top"><div><strong>Últimas acções registadas</strong><p class="muted">Alterações a atletas, treinadores, eventos, jogos, classificações e gestão de supervisores.</p></div><span class="pill">Registo automático</span></div><div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Responsável</th><th>Acção</th><th>Registo afectado</th></tr></thead><tbody id="auditRows"><tr><td colspan="4" class="muted">A carregar histórico...</td></tr></tbody></table></div></section>
 <div class="foot"><a href="index.html">← Voltar ao site público</a> · MACOVI SPORT CLUB</div>
 </div></main>
 <script type="module">
@@ -39,8 +40,24 @@ async function loadDashboard(profile){
  document.getElementById('supervisorCount').textContent=sups.error?'—':supervisors.length;
  document.getElementById('athleteCount').textContent=athletes.error?'—':(athletes.count??0);
  document.getElementById('sports').innerHTML=modalities.map(m=>'<article class="sport"><h3>'+escapeHtml(m.name)+'</h3><small>'+escapeHtml(m.slug)+'</small><p class="state">'+(m.active?'Modalidade activa':'Modalidade inactiva')+'</p></article>').join('');
- document.getElementById('supervisors').innerHTML=modalities.map(m=>{const s=supervisors.find(x=>x.modality_id===m.id);return '<tr><td>'+escapeHtml(m.name)+'</td><td>'+(s?escapeHtml(s.full_name||'Conta atribuída'):'Ainda não atribuído')+'</td><td>'+(s?(s.active?'<span class="pill">Activo</span>':'<span class="pill">Suspenso</span>'):'<span class="muted">Sem supervisor</span>')+'</td><td>'+(s?'<button class="small-action" data-action="toggle" data-user="'+s.user_id+'" data-modality="'+m.id+'" data-active="'+s.active+'">'+(s.active?'Suspender':'Reactivar')+'</button>':'')+'<button class="small-action" data-action="revoke" data-modality="'+m.id+'">Revogar convite</button></td></tr>';}).join('');
+ document.getElementById('supervisors').innerHTML=modalities.map(m=>{const s=supervisors.find(x=>x.modality_id===m.id);return '<tr><td>'+escapeHtml(m.name)+'</td><td>'+(s?escapeHtml(s.full_name||'Conta atribuída'):'Ainda não atribuído')+'</td><td>'+(s?(s.active?'<span class="pill">Activo</span>':'<span class="pill">Suspenso</span>'):'<span class="muted">Sem supervisor</span>')+'</td><td>'+(s?'<button class="small-action" data-action="toggle" data-user="'+s.user_id+'" data-modality="'+m.id+'" data-active="'+s.active+'">'+(s.active?'Suspender':'Reactivar')+'</button>'+(s.active?'<button class="small-action" data-action="recover" data-user="'+s.user_id+'" data-modality="'+m.id+'">Redefinir senha</button>':'')+'<button class="small-action" data-action="replace" data-user="'+s.user_id+'" data-modality="'+m.id+'">Substituir</button>':'')+'<button class="small-action" data-action="revoke" data-modality="'+m.id+'">Revogar convite</button></td></tr>';}).join('');
  if(sups.error)document.getElementById('supervisors').innerHTML='<tr><td colspan="4">Não foi possível consultar supervisores.</td></tr>';
+ await loadAudit();
+}
+async function loadAudit(){
+ const body=document.getElementById('auditRows');
+ const {data:logs,error}=await supabase.from('audit_logs').select('id,actor_id,action,table_name,record_id,changed_at,details').order('changed_at',{ascending:false}).limit(40);
+ if(error){body.innerHTML='<tr><td colspan="4">Não foi possível consultar o histórico.</td></tr>';return;}
+ const ids=[...new Set((logs||[]).map(x=>x.actor_id).filter(Boolean))];
+ const {data:profiles}=ids.length?await supabase.from('profiles').select('user_id,full_name').in('user_id',ids):{data:[]};
+ const names=new Map((profiles||[]).map(x=>[x.user_id,x.full_name]));
+ const labels={athletes_insert:'Criou atleta',athletes_update:'Alterou atleta',athletes_delete:'Removeu atleta',coaches_insert:'Criou treinador',coaches_update:'Alterou treinador',coaches_delete:'Removeu treinador',events_insert:'Criou evento',events_update:'Alterou evento',events_delete:'Removeu evento',matches_insert:'Criou jogo/resultado',matches_update:'Alterou jogo/resultado',matches_delete:'Removeu jogo',standings_insert:'Criou classificação',standings_update:'Alterou classificação',standings_delete:'Removeu classificação',supervisor_replaced:'Substituiu supervisor',supervisor_password_recovery_generated:'Gerou recuperação de senha',supervisor_invite_created:'Gerou convite',supervisor_invites_revoked:'Revogou convite',supervisor_account_activated:'Activou conta'};
+ body.innerHTML=(logs||[]).map(log=>{
+  const details=log.details||{}, record=(details.new||details.old||{});
+  const title=record.full_name||record.title||record.opponent||record.team_name||details.supervisor_name||details.email||log.record_id||'—';
+  const modality=details.modality||'';
+  return '<tr><td>'+escapeHtml(new Date(log.changed_at).toLocaleString('pt-PT'))+'</td><td>'+escapeHtml(names.get(log.actor_id)||details.email||'Sistema')+'</td><td>'+escapeHtml(labels[log.action]||log.action)+'</td><td>'+escapeHtml(title)+(modality?' · '+escapeHtml(modality):'')+'</td></tr>';
+ }).join('')||'<tr><td colspan="4" class="muted">Ainda não existem acções registadas.</td></tr>';
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function checkSession(){
@@ -61,6 +78,21 @@ document.getElementById('supervisors').addEventListener('click',async e=>{
   const {data,error}=await supabase.from('profiles').update({active:nextActive}).eq('user_id',button.dataset.user).select('user_id').maybeSingle();
   if(error||!data)alert('Não foi possível alterar o estado desta conta.');
   else alert(nextActive?'Supervisor reactivado.':'Supervisor suspenso.');
+ }else if(action==='replace'){
+  if(confirm('Confirmas a substituição? O supervisor antigo será desvinculado desta modalidade, ficará suspenso e não poderá voltar a entrar. O histórico e os dados da modalidade serão preservados.')){
+   const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'replace',user_id:button.dataset.user,modality_id:button.dataset.modality}});
+   if(error||!data?.ok)alert(data?.error||'Não foi possível substituir o supervisor.');
+   else alert(data.message);
+  }
+ }else if(action==='recover'){
+  if(confirm('Gerar um link de recuperação de palavra-passe para este supervisor? O link é de uso único e deve ser enviado em privado.')){
+   const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'recover',user_id:button.dataset.user,modality_id:button.dataset.modality}});
+   if(error||!data?.ok)alert(data?.error||'Não foi possível gerar o link de recuperação.');
+   else{
+    try{await navigator.clipboard.writeText(data.action_link);alert(data.message+'\n\nLink copiado para a área de transferência: '+data.email);}
+    catch{prompt('Copia este link e envia-o em privado a '+data.email,data.action_link);}
+   }
+  }
  }
  await loadDashboard(currentProfile);
 });
