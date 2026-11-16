@@ -65,7 +65,7 @@
 <article class="sport-card" data-sport="Futsal Feminino"><div class="sport-icon">◉</div><h3>Futsal Feminino</h3><p>Talento, técnica e espírito de equipa.</p><button>Ver escalões ↗</button></article>
 <article class="sport-card" data-sport="Futsal Masculino"><div class="sport-icon">◉</div><h3>Futsal Masculino</h3><p>Competitividade, disciplina e união.</p><button>Ver escalões ↗</button></article>
 <article class="sport-card" data-sport="Basquetebol"><div class="sport-icon">◎</div><h3>Basquetebol</h3><p>Coordenação, superação e jogo colectivo.</p><button>Ver escalões ↗</button></article></div>
-<div class="detail-panel" id="detail"><div class="detail-head"><h3 id="sporttitle">Xadrez</h3><div class="tabs" role="tablist" aria-label="Escalões"><button class="active" data-age="juvenis" role="tab" aria-selected="true">Juvenis · Sub-17</button><button data-age="juniores" role="tab" aria-selected="false">Juniores · Sub-20</button></div></div><div class="age-panel" id="agepanel"><h4>Juvenis · Sub-17</h4><p>Informações de atletas, equipa técnica, calendário e classificação deste escalão serão publicadas após validação oficial pelo responsável da modalidade.</p></div></div>
+<div class="detail-panel" id="detail"><div class="detail-head"><h3 id="sporttitle">Xadrez</h3><div class="tabs" role="tablist" aria-label="Escalões"><button class="active" data-age="juvenis" role="tab" aria-selected="true">Juvenis · Sub-17</button><button data-age="juniores" role="tab" aria-selected="false">Juniores · Sub-20</button></div></div><div id="publicBranchWrap" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0"><label for="publicBranch" style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase">Filial</label><select id="publicBranch" style="padding:10px 14px;background:#071c14;color:#fff;border:1px solid rgba(255,255,255,.2)"><option value="todas">Todas as filiais</option><option>Luanda</option><option>Uíge</option><option>Huíla</option><option>Namibe</option><option>Portugal</option></select></div><div class="age-panel" id="agepanel"><h4>Juvenis · Sub-17</h4><p>Informações de atletas, equipa técnica, calendário e classificação deste escalão serão publicadas após validação oficial pelo responsável da modalidade.</p></div></div>
 </div></section></div>
 <div class="view" id="view-competicoes"><section class="page-hero"><div class="shell"><div class="eyebrow">Acompanha o club</div><h1 class="page-title">Centro de<br>competições.</h1><p>Calendários e resultados organizados por modalidade e escalão. Apenas informação confirmada será publicada.</p></div></section><section class="section"><div class="shell competition-grid"><div class="dark-panel"><h3>Próximos jogos</h3><div class="status"><strong>Calendário em actualização</strong>As próximas partidas serão divulgadas após confirmação das datas, locais e adversários.</div></div><div class="dark-panel"><h3>Últimos resultados</h3><div class="status"><strong>Resultados oficiais</strong>Os resultados serão publicados nesta área assim que forem validados pela equipa técnica.</div></div></div></section></div>
 <div class="view" id="view-inscricao"><section class="page-hero"><div class="shell"><div class="eyebrow">Faz parte da família</div><h1 class="page-title">O teu próximo capítulo<br>começa aqui.</h1><p>Manifesta o teu interesse em integrar uma modalidade do Macovi Sport Club.</p></div></section><section class="section"><div class="shell"><div class="form-shell"><div class="form-grid"><div class="field"><label for="nome">Nome do atleta</label><input id="nome" placeholder="Nome completo"></div><div class="field"><label for="nascimento">Data de nascimento</label><input id="nascimento" type="date"></div><div class="field"><label for="responsavel">Contacto do encarregado</label><input id="responsavel" type="tel" placeholder="+244"></div><div class="field"><label for="modalidade">Modalidade pretendida</label><select id="modalidade"><option value="">Seleccionar modalidade</option><option>Xadrez</option><option>Andebol Feminino</option><option>Futsal Feminino</option><option>Futsal Masculino</option><option>Basquetebol</option></select></div></div><p class="form-note">Este formulário é uma demonstração visual. O envio e armazenamento de inscrições serão activados quando a ligação segura à base de dados estiver configurada.</p><button class="btn" id="interest">Preparar pedido ↗</button><p id="formmsg" class="form-note" aria-live="polite"></p></div></div></section></div>
@@ -99,9 +99,10 @@ function showView(name){views.forEach(v=>v.classList.toggle('active',v.id==='vie
 nav.forEach(el=>el.addEventListener('click',e=>{e.preventDefault();showView(el.dataset.view)}));
 hamb.addEventListener('click',()=>{const open=menu.classList.toggle('open');hamb.setAttribute('aria-expanded',String(open));hamb.textContent=open?'×':'☰'});
 let currentSport='Xadrez',currentAge='juvenis';const detail=document.getElementById('detail'),panel=document.getElementById('agepanel');
-document.querySelectorAll('.sport-card').forEach(card=>card.addEventListener('click',()=>{currentSport=card.dataset.sport;currentAge='juvenis';document.getElementById('sporttitle').textContent=currentSport;document.querySelectorAll('.tabs button').forEach(b=>{b.classList.toggle('active',b.dataset.age==='juvenis');b.setAttribute('aria-selected',String(b.dataset.age==='juvenis'))});renderAge();detail.classList.add('open');detail.scrollIntoView({behavior:'smooth',block:'nearest'})}));
+document.querySelectorAll('.sport-card').forEach(card=>card.addEventListener('click',()=>{currentSport=card.dataset.sport;document.getElementById('publicBranchWrap').style.display=currentSport==='Xadrez'?'flex':'none';currentAge='juvenis';document.getElementById('sporttitle').textContent=currentSport;document.querySelectorAll('.tabs button').forEach(b=>{b.classList.toggle('active',b.dataset.age==='juvenis');b.setAttribute('aria-selected',String(b.dataset.age==='juvenis'))});renderAge();detail.classList.add('open');detail.scrollIntoView({behavior:'smooth',block:'nearest'})}));
 const sportFields={'Xadrez':['Título / categoria','Rating FIDE','Rating nacional','Tabuleiro / mesa','Clube'],'Andebol Feminino':['Número de camisola','Posição'],'Futsal Feminino':['Número de camisola','Posição'],'Futsal Masculino':['Número de camisola','Posição'],'Basquetebol':['Número de camisola','Posição','Altura']};
 let clubData=null;
+let currentBranch='todas';
 const sportSlugs={'Xadrez':'xadrez','Andebol Feminino':'andebol-feminino','Futsal Feminino':'futsal-feminino','Futsal Masculino':'futsal-masculino','Basquetebol':'basquetebol'};
 function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function emptyCard(title,description,message){return '<article class="dossier-card"><h5>'+title+'</h5><p>'+description+'</p><div class="data-line">'+message+'</div></article>';}
@@ -116,10 +117,10 @@ function renderAge(){
   if(!age){
     cards=emptyCard('Dados do escalão','Área de informação do escalão.','Dados ainda não publicados.');
   }else{
-    const athletes=Array.isArray(age.plantel)?age.plantel:[];
+    const athletes=(Array.isArray(age.plantel)?age.plantel:[]).filter(a=>currentSport!=='Xadrez'||currentBranch==='todas'||a.filial===currentBranch);
     const staff=Array.isArray(age.equipaTecnica)?age.equipaTecnica:[];
-    const fixtures=Array.isArray(age.jogos)?age.jogos:[];
-    const standings=Array.isArray(age.classificacao)?age.classificacao:[];
+    const fixtures=(Array.isArray(age.jogos)?age.jogos:[]).filter(j=>currentSport!=='Xadrez'||currentBranch==='todas'||j.filial===currentBranch);
+    const standings=(Array.isArray(age.classificacao)?age.classificacao:[]).filter(t=>currentSport!=='Xadrez'||currentBranch==='todas'||t.filial===currentBranch);
     const athleteRows=athletes.length?athletes.map(a=>'<div class="data-line">'+(a.foto?'<img src="'+esc(a.foto)+'" alt="Fotografia de '+esc(a.nome||'atleta')+'" loading="lazy" style="width:64px;height:64px;object-fit:cover;border-radius:50%;float:right;margin:0 0 8px 12px">':'')+'<strong>'+esc(a.nome||'Atleta')+'</strong><div class="dossier-fields">'+fields.map(field=>'<span>'+esc(field)+': '+esc((a.dados||{})[field]||'—')+'</span>').join('')+'</div><div style="clear:both"></div></div>').join(''): '<div class="data-line">Plantel por publicar pelo responsável da modalidade.</div>';
     const staffRows=staff.length?staff.map(p=>'<div class="data-line">'+(p.foto?'<img src="'+esc(p.foto)+'" alt="Fotografia de '+esc(p.nome||'membro da equipa técnica')+'" loading="lazy" style="width:52px;height:52px;object-fit:cover;border-radius:50%;float:right;margin:0 0 8px 12px">':'')+'<strong>'+esc(p.nome||'')+'</strong><span>'+esc(p.funcao||'Equipa técnica')+'</span><div style="clear:both"></div></div>').join(''):'<div class="data-line">Equipa técnica por confirmar.</div>';
     const fixtureRows=fixtures.length?fixtures.map(j=>'<div class="data-line"><strong>'+esc(j.data||'Data por definir')+' · '+esc(j.adversario||'Adversário por confirmar')+'</strong><span>'+esc([j.hora,j.local,j.resultado,j.estado].filter(Boolean).join(' · '))+'</span></div>').join(''):'<div class="data-line">Calendário por publicar.</div>';
@@ -144,23 +145,23 @@ const sb=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable
 const blankAge=()=>({plantel:[],equipaTecnica:[],jogos:[],classificacao:[]});
 function mapAthlete(a){
  const dados={'Título / categoria':a.chess_title,'Rating FIDE':a.fide_rating,'Rating nacional':a.national_rating,'Tabuleiro / mesa':a.board_number,'Clube':a.club_name,'Número de camisola':a.jersey_number,'Posição':a.sport_role,'Altura':a.height_cm?String(a.height_cm)+' cm':null};
- return {nome:a.full_name,foto:a.photo_path,dados:dados};
+ return {nome:a.full_name,foto:a.photo_path,filial:a.branch,dados:dados};
 }
 function mapCoach(p){return {nome:p.full_name,funcao:p.role_title,foto:p.photo_path};}
 function mapMatch(m){
  const state={vitoria:'Vitória',empate:'Empate',derrota:'Derrota',por_realizar:'Por realizar'};
- return {data:m.starts_at?new Date(m.starts_at).toLocaleDateString('pt-AO'):'Data por definir',hora:m.starts_at?new Date(m.starts_at).toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'}):'',adversario:m.opponent,local:m.venue,resultado:(m.macovi_score??'—')+' : '+(m.opponent_score??'—'),estado:state[m.result]||'Resultado por confirmar'};
+ return {data:m.starts_at?new Date(m.starts_at).toLocaleDateString('pt-AO'):'Data por definir',hora:m.starts_at?new Date(m.starts_at).toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'}):'',adversario:m.opponent,local:m.venue,resultado:(m.macovi_score??'—')+' : '+(m.opponent_score??'—'),estado:state[m.result]||'Resultado por confirmar',filial:m.branch};
 }
 function mapEvent(e){return {data:e.starts_at?new Date(e.starts_at).toLocaleDateString('pt-AO'):'Data por definir',hora:e.starts_at?new Date(e.starts_at).toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'}):'',adversario:e.title,local:e.venue,estado:e.event_type};}
 async function loadClubData(){
  const mods=await sb.from('modalities').select('id,slug,name').eq('active',true).order('name');
  if(mods.error)throw mods.error;
  const results=await Promise.all([
-  sb.from('athletes').select('id,modality_id,age_group,full_name,sex,photo_path,club_name,sport_role,jersey_number,height_cm,chess_title,fide_rating,national_rating,board_number,biography,display_order').eq('active',true).order('display_order').order('full_name'),
+  sb.from('athletes').select('id,modality_id,age_group,branch,full_name,sex,photo_path,club_name,sport_role,jersey_number,height_cm,chess_title,fide_rating,national_rating,board_number,biography,display_order').eq('active',true).order('display_order').order('full_name'),
   sb.from('coaches').select('id,modality_id,age_group,full_name,role_title,photo_path,biography').eq('active',true).order('full_name'),
   sb.from('events').select('id,modality_id,age_group,title,event_type,venue,starts_at,ends_at,description').eq('published',true).order('starts_at'),
-  sb.from('matches').select('id,modality_id,age_group,opponent,competition,venue,starts_at,macovi_score,opponent_score,result,notes').eq('published',true).order('starts_at'),
-  sb.from('standings').select('id,modality_id,age_group,competition,team_name,played,wins,draws,losses,points,position,season').eq('published',true).order('position')
+  sb.from('matches').select('id,modality_id,age_group,branch,opponent,competition,venue,starts_at,macovi_score,opponent_score,result,notes').eq('published',true).order('starts_at'),
+  sb.from('standings').select('id,modality_id,age_group,branch,competition,team_name,played,wins,draws,losses,points,position,season').eq('published',true).order('position')
  ]);
  for(const result of results)if(result.error)throw result.error;
  const data={modalidades:{}},byId={};
@@ -169,9 +170,10 @@ async function loadClubData(){
  for(const p of results[1].data||[]){const age=data.modalidades[byId[p.modality_id]]?.escaloes?.[p.age_group||'juvenis'];if(age)age.equipaTecnica.push(mapCoach(p));}
  for(const m of results[3].data||[]){const age=data.modalidades[byId[m.modality_id]]?.escaloes?.[m.age_group||'juvenis'];if(age)age.jogos.push(mapMatch(m));}
  for(const e of results[2].data||[]){const groups=e.age_group?[e.age_group]:['juvenis','juniores'];for(const group of groups){const age=data.modalidades[byId[e.modality_id]]?.escaloes?.[group];if(age)age.jogos.push(mapEvent(e));}}
- for(const s of results[4].data||[]){const age=data.modalidades[byId[s.modality_id]]?.escaloes?.[s.age_group||'juvenis'];if(age)age.classificacao.push({posicao:s.position,equipa:s.team_name,jogos:s.played,vitorias:s.wins,empates:s.draws,derrotas:s.losses,pontos:s.points});}
+ for(const s of results[4].data||[]){const age=data.modalidades[byId[s.modality_id]]?.escaloes?.[s.age_group||'juvenis'];if(age)age.classificacao.push({posicao:s.position,equipa:s.team_name,jogos:s.played,vitorias:s.wins,empates:s.draws,derrotas:s.losses,pontos:s.points,filial:s.branch});}
  clubData=data;renderAge();
 }
+document.getElementById('publicBranch').addEventListener('change',e=>{currentBranch=e.target.value;renderAge();});
 loadClubData().catch(err=>{console.error('MACOVI public data:',err);clubData={modalidades:{}};renderAge();});
 </script>
 </body></html>
