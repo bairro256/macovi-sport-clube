@@ -39,10 +39,7 @@ async function checkSession(){
  const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id,active').eq('user_id',session.user.id).maybeSingle();
  if(error||!profile){message.textContent='Conta autenticada, mas ainda sem perfil autorizado. Contacta o Administrador Sénior.';await supabase.auth.signOut();return;}
  if(profile.role!==expectedRole||profile.active!==true){message.textContent='Esta conta não está autorizada ou encontra-se suspensa. Contacta o Administrador Sénior.';await supabase.auth.signOut();return;}
- login.classList.add('hide');account.classList.add('show');
- document.getElementById('welcome').textContent='Bem-vindo, '+(profile.full_name||session.user.email);
- document.getElementById('roleText').textContent=profile.role==='senior_admin'?'Administrador Sénior · Acesso global':'Supervisor · Acesso limitado à modalidade atribuída';
- document.getElementById('setupMessage').textContent='Identidade confirmada. O painel de gestão será apresentado após a activação dos módulos de acesso.';
+ location.replace('supervisor-dashboard.html');
 }
 document.getElementById('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();const btn=document.getElementById('submit');btn.disabled=true;btn.textContent='A validar...';message.textContent='';
