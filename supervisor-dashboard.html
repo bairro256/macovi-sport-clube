@@ -81,7 +81,8 @@ function renderForm(){
  const cfg=configs[section];$('formTitle').textContent=(editingId?'Editar ':'Adicionar ')+cfg.singular;
  const row=editingId?rows.find(x=>x.id===editingId):null;
  $('fields').innerHTML=visibleFields().map(f=>{
- const [key,name,type,required,opts]=f,v=row?.[key]??(key==='branch'&&modality.slug==='xadrez'&&$('branchFilter').value!=='todas'?$('branchFilter').value:null);\n const choices=key==='age_group'&&modality?.slug==='xadrez'?[...(opts||[]).filter(o=>o!=='seniores'),'seniores']:(opts||[]);
+ const [key,name,type,required,opts]=f,v=row?.[key]??(key==='branch'&&modality.slug==='xadrez'&&$('branchFilter').value!=='todas'?$('branchFilter').value:null);
+  const choices=key==='age_group'&&modality?.slug==='xadrez'?[...(opts||[]).filter(o=>o!=='seniores'),'seniores']:(opts||[]);
  if(type==='checkbox'){const checked=v===undefined?(key==='active'&&(section==='athletes'||section==='coaches')):v===true;return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(checked?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';}
  let input='';
  if(type==='file')input='<input id="f_'+key+'" type="file" accept="image/jpeg,image/png,image/webp">'+(v?'<div class="muted">Fotografia actual: <a href="'+esc(v)+'" target="_blank" rel="noopener">ver imagem</a></div>':'');
