@@ -57,6 +57,36 @@ async function loadNews(){
  box.innerHTML=(data||[]).map(n=>'<article class="news-item">'+(n.image_path?'<img src="'+escapeHtml(supabase.storage.from('macovi-photos').getPublicUrl(n.image_path).data.publicUrl)+'" alt="">':'')+'<div class="news-item-main"><small>'+escapeHtml(n.category)+' · '+(n.published?'<span class="news-status">Publicada</span>':'Rascunho')+(n.video_path?' · Vídeo anexado':'')+'</small><strong>'+escapeHtml(n.title)+'</strong><p>'+escapeHtml(n.summary||'Sem resumo')+'</p></div><div class="news-item-actions"><button class="small-action" data-news-edit="'+n.id+'">Editar</button><button class="small-action danger" data-news-delete="'+n.id+'">Eliminar</button></div></article>').join('')||'<div class="muted">Ainda não existem notícias. Cria a primeira publicação acima.</div>';
 }
 
+async function createVideoThumbnail(file){
+ const video=document.createElement('video'),url=URL.createObjectURL(file);
+ video.muted=true;video.playsInline=true;video.preload='auto';video.src=url;
+ try{
+  await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('Este vídeo não permite criar uma pré-visualização neste formato. Escolhe uma fotografia de capa.'));});
+  const duration=Number.isFinite(video.duration)?video.duration:0;
+  const candidates=[0.5,1,1.5,2,3,4,5,duration*0.2,duration*0.35].filter((t,i,a)=>duration>0&&t<duration-0.12&&a.indexOf(t)===i);
+  if(!candidates.length)throw new Error('O vídeo é demasiado curto para criar uma capa automática. Escolhe uma fotografia de capa.');
+  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
+  let bestData=null,bestLight=0;
+  for(const time of candidates){
+   await new Promise(resolve=>{const done=()=>{video.removeEventListener('seeked',done);resolve();};video.addEventListener('seeked',done,{once:true});video.currentTime=time;setTimeout(()=>{video.removeEventListener('seeked',done);resolve();},2500);});
+   if(!video.videoWidth||!video.videoHeight)continue;
+   const scale=Math.min(1,960/video.videoWidth);canvas.width=Math.round(video.videoWidth*scale);canvas.height=Math.round(video.videoHeight*scale);
+   ctx.drawImage(video,0,0,canvas.width,canvas.height);
+   const sample=document.createElement('canvas');sample.width=32;sample.height=18;const sctx=sample.getContext('2d',{willReadFrequently:true});sctx.drawImage(canvas,0,0,32,18);
+   const pixels=sctx.getImageData(0,0,32,18).data;let light=0;
+   for(let i=0;i<pixels.length;i+=4)light+=0.2126*pixels[i]+0.7152*pixels[i+1]+0.0722*pixels[i+2];
+   light/=pixels.length/4;
+   if(light>bestLight){bestLight=light;bestData=canvas.toDataURL('image/jpeg',0.88);}
+   if(light>24)break;
+  }
+  if(!bestData||bestLight<12)throw new Error('Não foi encontrada uma imagem visível no vídeo. Escolhe uma fotografia de capa para evitar uma pré-visualização preta.');
+  const img=new Image();img.src=bestData;await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});
+  const out=document.createElement('canvas');out.width=img.naturalWidth;out.height=img.naturalHeight;out.getContext('2d').drawImage(img,0,0);
+  const blob=await new Promise(resolve=>out.toBlob(resolve,'image/jpeg',0.88));
+  if(!blob)throw new Error('Não foi possível gerar a imagem de capa.');
+  return blob;
+ }finally{URL.revokeObjectURL(url);video.removeAttribute('src');video.load();}
+}
 async function uploadNewsVideo(file,path){
  const {error}=await supabase.storage.from('macovi-photos').upload(path,file,{
   contentType:file.type,
@@ -83,7 +113,7 @@ async function saveNews(e){
   const {error:uploadError}=await supabase.storage.from('macovi-photos').upload(imagePath,file,{contentType:file.type,upsert:false});
   if(uploadError){msg.textContent='Falha ao carregar fotografia: '+uploadError.message;btn.disabled=false;return;}
  }
- if(videoFile){const ext=videoFile.type==='video/mp4'?'mp4':videoFile.type==='video/webm'?'webm':'mov';videoPath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;try{await uploadNewsVideo(videoFile,videoPath);}catch(uploadError){msg.textContent='Falha ao carregar vídeo: '+uploadError.message;btn.disabled=false;return;}}
+ if(videoFile){const ext=videoFile.type==='video/mp4'?'mp4':videoFile.type==='video/webm'?'webm':'mov';videoPath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;try{msg.textContent='A preparar uma capa automática para o vídeo...';if(!imagePath){const thumbnail=await createVideoThumbnail(videoFile);imagePath=mediaRoot+'/news/'+crypto.randomUUID()+'-capa.jpg';const {error:thumbError}=await supabase.storage.from('macovi-photos').upload(imagePath,thumbnail,{contentType:'image/jpeg',cacheControl:'3600',upsert:false});if(thumbError)throw thumbError;}msg.textContent='A carregar vídeo e imagem de capa...';await uploadNewsVideo(videoFile,videoPath);}catch(uploadError){msg.textContent='Não foi possível preparar a capa ou carregar o vídeo: '+uploadError.message;btn.disabled=false;return;}}
  const payload={title,category:document.getElementById('newsCategory').value,summary:document.getElementById('newsSummary').value.trim()||null,body,modality_id:document.getElementById('newsModality').value||null,published,published_at:published?new Date().toISOString():null,updated_by:currentProfile.user_id||null};
  if(imagePath)payload.image_path=imagePath;if(videoPath)payload.video_path=videoPath;
  let result;
