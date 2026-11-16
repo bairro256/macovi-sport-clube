@@ -1,56 +1,51 @@
 <!doctype html>
-<html lang="pt-AO"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061a14"><title>Administrador Sénior | MACOVI SPORT CLUB</title><style>
+<html lang="pt-AO"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061a14"><title>Administração | MACOVI SPORT CLUB</title><style>
 :root{--bg:#061a14;--panel:#0c251b;--green:#00a85a;--bright:#19c875;--line:rgba(220,245,230,.14);--muted:#a6b8ae;--white:#f4f7f4}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 10%,rgba(0,168,90,.16),transparent 38%),var(--bg);color:var(--white);font-family:Inter,Arial,sans-serif;display:grid;place-items:center;padding:22px}
-.wrap{width:min(100%,470px)}.brand{display:flex;align-items:center;gap:13px;margin-bottom:25px}.brand img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}.brand strong{font-size:15px;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.2em;margin-top:4px}
-.panel{background:linear-gradient(145deg,#102d22,#081e15);border:1px solid var(--line);border-top:3px solid var(--green);padding:30px;box-shadow:0 22px 70px rgba(0,0,0,.3)}.eyebrow{color:var(--bright);font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:900}.panel h1{font-size:30px;letter-spacing:-.05em;text-transform:uppercase;margin:9px 0}.panel p{color:var(--muted);font-size:13px;line-height:1.6}
-label{display:block;margin:17px 0 7px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#c5d5cb}input{width:100%;padding:14px;background:#061810;border:1px solid var(--line);color:white;outline:none;border-radius:2px}input:focus{border-color:var(--green)}
-button,.back{width:100%;display:flex;justify-content:center;align-items:center;padding:14px;margin-top:20px;background:var(--green);border:1px solid var(--green);color:#03140d;font-weight:1000;letter-spacing:.12em;text-transform:uppercase;font-size:11px;cursor:pointer;text-decoration:none}button:hover,.back:hover{background:var(--bright)}button:disabled{opacity:.55;cursor:wait}
-.message{min-height:22px;margin-top:14px!important;font-size:12px!important}.foot{color:var(--muted);font-size:10px;text-align:center;margin-top:20px}.foot a{color:var(--bright);text-decoration:none}.secure{font-size:10px;color:#90a99a;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
-.account{display:none}.account.show{display:block}.login.hide{display:none}.pill{display:inline-block;padding:6px 9px;background:#09271b;color:var(--bright);border:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
-</style></head>
-<body><main class="wrap">
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 0,rgba(0,168,90,.14),transparent 35%),var(--bg);color:var(--white);font-family:Inter,Arial,sans-serif}.shell{width:min(1180px,100%);margin:auto;padding:22px}.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none;margin-bottom:26px}.brand img{width:48px;height:48px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}.brand strong{font-size:14px;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.18em;margin-top:4px}.panel{background:linear-gradient(145deg,#102d22,#081e15);border:1px solid var(--line);border-top:3px solid var(--green);padding:26px;box-shadow:0 18px 55px #0003}.eyebrow{color:var(--bright);font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:900}.panel h1{font-size:clamp(25px,5vw,38px);letter-spacing:-.05em;text-transform:uppercase;margin:9px 0}.muted{color:var(--muted);font-size:13px;line-height:1.6}.login-wrap{width:min(100%,470px);margin:8vh auto}.login-wrap .brand{margin-bottom:25px}label{display:block;margin:17px 0 7px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#c5d5cb}input{width:100%;padding:14px;background:#061810;border:1px solid var(--line);color:white;outline:none;border-radius:2px}input:focus{border-color:var(--green)}button,.btn{display:inline-flex;justify-content:center;align-items:center;padding:12px 16px;margin-top:14px;background:var(--green);border:1px solid var(--green);color:#03140d;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:10px;cursor:pointer;text-decoration:none}button:hover,.btn:hover{background:var(--bright)}button:disabled{opacity:.55;cursor:wait}.message{min-height:20px;margin-top:12px!important;font-size:12px!important}.secure,.foot{color:var(--muted);font-size:10px;margin-top:18px}.foot a{color:var(--bright);text-decoration:none}.account{display:none}.account.show{display:block}.login.hide{display:none}.pill{display:inline-block;padding:6px 9px;background:#09271b;color:var(--bright);border:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.top button{margin:0}.welcome{margin:26px 0}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.metric,.sport{background:#091f16;border:1px solid var(--line);padding:18px}.metric strong{display:block;font-size:27px;margin-top:8px}.metric span,.sport small{color:var(--muted);font-size:11px}.section-title{font-size:17px;margin:30px 0 12px}.sports{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sport h3{margin:0 0 8px;font-size:16px}.sport .state{color:var(--bright);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.notice{margin-top:22px;padding:17px;border-left:3px solid var(--green);background:#0a2118}.notice strong{font-size:12px}.notice p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.6}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}td,th{text-align:left;padding:11px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}@media(max-width:650px){.shell{padding:16px}.metrics{grid-template-columns:1fr 1fr}.sports{grid-template-columns:1fr}.panel{padding:20px}} 
+</style></head><body><main class="shell">
+<div class="login-wrap" id="login">
 <a class="brand" href="index.html"><img src="assets/macovi.webp" alt="Emblema Macovi"><span><strong>MACOVI SPORT CLUB</strong><small>PLATAFORMA INTERNA</small></span></a>
-<section class="panel">
-<div class="login" id="login">
-<div class="eyebrow">Área reservada · Nível 1</div><h1>Administrador Sénior</h1><p>Acesso reservado à administração central do Macovi Sport Club.</p>
-<form id="loginForm">
-<label for="email">Gmail / endereço de e-mail</label><input id="email" type="email" autocomplete="username" required>
-<label for="password">Palavra-passe</label><input id="password" type="password" autocomplete="current-password" required>
-<button id="submit" type="submit">Entrar na plataforma ↗</button>
-</form>
-<p class="message" id="message" aria-live="polite"></p>
-<div class="secure">A autenticação é validada pelo Supabase. Não existe criação pública de contas nesta página.</div>
+<section class="panel"><div class="eyebrow">Área reservada · Nível 1</div><h1>Administrador Sénior</h1><p class="muted">Acesso reservado à administração central do Macovi Sport Club.</p>
+<form id="loginForm"><label for="email">Gmail / endereço de e-mail</label><input id="email" type="email" autocomplete="username" required><label for="password">Palavra-passe</label><input id="password" type="password" autocomplete="current-password" required><button id="submit" type="submit">Entrar na plataforma ↗</button></form><p class="message muted" id="message" aria-live="polite"></p><div class="secure">Autenticação protegida pelo Supabase. Não existe criação pública de contas.</div></section>
 </div>
-<div class="account" id="account"><span class="pill">Sessão autenticada</span><h1 id="welcome">Acesso autorizado</h1><p id="roleText"></p><p class="message" id="setupMessage">A carregar o teu perfil...</p><button id="logout">Terminar sessão</button></div>
-</section>
+<div class="account" id="account">
+<header class="top"><a class="brand" href="index.html"><img src="assets/macovi.webp" alt="Emblema Macovi"><span><strong>MACOVI SPORT CLUB</strong><small>ADMINISTRAÇÃO CENTRAL</small></span></a><button id="logout">Terminar sessão</button></header>
+<section class="welcome"><span class="pill">Sessão autenticada · Nível 1</span><h1 id="welcome">Painel de administração</h1><p class="muted">Administrador Sénior · Acesso global à plataforma.</p></section>
+<div class="metrics"><div class="metric"><span>Modalidades registadas</span><strong id="modalityCount">—</strong></div><div class="metric"><span>Supervisores criados</span><strong id="supervisorCount">—</strong></div><div class="metric"><span>Atletas registados</span><strong id="athleteCount">—</strong></div></div>
+<h2 class="section-title">Modalidades do clube</h2><div class="sports" id="sports"><div class="sport"><p class="muted">A carregar modalidades...</p></div></div>
+<h2 class="section-title">Gestão de supervisores</h2><section class="panel"><div class="top"><div><strong>Contas de supervisão</strong><p class="muted">Uma conta por modalidade, com permissões limitadas à sua área.</p></div><span class="pill">Módulo em preparação</span></div><div class="table-wrap"><table><thead><tr><th>Modalidade</th><th>Supervisor</th><th>Estado</th></tr></thead><tbody id="supervisors"><tr><td colspan="3" class="muted">A consultar registos...</td></tr></tbody></table></div><div class="notice"><strong>Próxima activação: convites seguros</strong><p>O painel já confirma a tua identidade e consulta os dados do clube. A geração e revogação de códigos individuais será ligada a uma função segura no servidor; não serão criados códigos falsos nem exposta uma chave administrativa no navegador.</p></div></section>
 <div class="foot"><a href="index.html">← Voltar ao site público</a> · MACOVI SPORT CLUB</div>
-</main>
+</div></main>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const SUPABASE_URL='https://jblxmqoodtfhediqegar.supabase.co';
 const SUPABASE_KEY='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
-const expectedRole='senior_admin';
 const login=document.getElementById('login'),account=document.getElementById('account'),message=document.getElementById('message');
-async function checkSession(){
- const {data:{session}}=await supabase.auth.getSession();
- if(!session)return;
- const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id').eq('user_id',session.user.id).maybeSingle();
- if(error||!profile){message.textContent='Conta autenticada, mas ainda sem perfil autorizado. Contacta o Administrador Sénior.';await supabase.auth.signOut();return;}
- if(profile.role!==expectedRole){message.textContent='Esta conta não tem permissão para esta área.';await supabase.auth.signOut();return;}
- login.classList.add('hide');account.classList.add('show');
- document.getElementById('welcome').textContent='Bem-vindo, '+(profile.full_name||session.user.email);
- document.getElementById('roleText').textContent=profile.role==='senior_admin'?'Administrador Sénior · Acesso global':'Supervisor · Acesso limitado à modalidade atribuída';
- document.getElementById('setupMessage').textContent='Identidade confirmada. O painel de gestão será apresentado após a activação dos módulos de acesso.';
+async function loadDashboard(profile){
+ document.getElementById('welcome').textContent='Bem-vindo, '+(profile.full_name||'Administrador Sénior');
+ const [mods,sups,athletes]=await Promise.all([
+  supabase.from('modalities').select('id,slug,name,is_active').order('name'),
+  supabase.from('profiles').select('user_id,full_name,modality_id').eq('role','supervisor'),
+  supabase.from('athletes').select('id',{count:'exact',head:true})
+ ]);
+ if(mods.error){document.getElementById('sports').innerHTML='<div class="sport">Não foi possível carregar as modalidades. '+mods.error.message+'</div>';return;}
+ const modalities=mods.data||[], supervisors=sups.data||[];
+ document.getElementById('modalityCount').textContent=modalities.length;
+ document.getElementById('supervisorCount').textContent=sups.error?'—':supervisors.length;
+ document.getElementById('athleteCount').textContent=athletes.error?'—':(athletes.count??0);
+ document.getElementById('sports').innerHTML=modalities.map(m=>'<article class="sport"><h3>'+escapeHtml(m.name)+'</h3><small>'+escapeHtml(m.slug)+'</small><p class="state">'+(m.is_active?'Modalidade activa':'Modalidade inactiva')+'</p></article>').join('');
+ document.getElementById('supervisors').innerHTML=modalities.map(m=>{const s=supervisors.find(x=>x.modality_id===m.id);return '<tr><td>'+escapeHtml(m.name)+'</td><td>'+(s?escapeHtml(s.full_name||'Conta atribuída'):'Ainda não atribuído')+'</td><td>'+(s?'<span class="pill">Registado</span>':'<span class="muted">Pendente</span>')+'</td></tr>';}).join('');
+ if(sups.error)document.getElementById('supervisors').innerHTML='<tr><td colspan="3">Não foi possível consultar supervisores.</td></tr>';
 }
-document.getElementById('loginForm').addEventListener('submit',async e=>{
- e.preventDefault();const btn=document.getElementById('submit');btn.disabled=true;btn.textContent='A validar...';message.textContent='';
- const {error}=await supabase.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});
- if(error){message.textContent='Não foi possível entrar. Confirma o e-mail e a palavra-passe ou verifica se a conta já foi activada.';await supabase.auth.signOut();}
- else await checkSession();
- btn.disabled=false;btn.textContent='Entrar na plataforma ↗';
-});
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function checkSession(){
+ const {data:{session}}=await supabase.auth.getSession();if(!session)return;
+ const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id').eq('user_id',session.user.id).maybeSingle();
+ if(error||!profile||profile.role!=='senior_admin'){message.textContent='Esta conta não tem permissão de Administrador Sénior.';await supabase.auth.signOut();return;}
+ login.classList.add('hide');account.classList.add('show');await loadDashboard(profile);
+}
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();const btn=document.getElementById('submit');btn.disabled=true;btn.textContent='A validar...';message.textContent='';const {error}=await supabase.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});if(error){message.textContent='Não foi possível entrar. Confirma o e-mail e a palavra-passe.';await supabase.auth.signOut();}else await checkSession();btn.disabled=false;btn.textContent='Entrar na plataforma ↗';});
 document.getElementById('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 checkSession();
 </script></body></html>
