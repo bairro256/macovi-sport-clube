@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-AO"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061a14"><title>Administrador Sénior | MACOVI SPORT CLUB</title><style>
+:root{--bg:#061a14;--panel:#0c251b;--green:#00a85a;--bright:#19c875;--line:rgba(220,245,230,.14);--muted:#a6b8ae;--white:#f4f7f4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 10%,rgba(0,168,90,.16),transparent 38%),var(--bg);color:var(--white);font-family:Inter,Arial,sans-serif;display:grid;place-items:center;padding:22px}
+.wrap{width:min(100%,470px)}.brand{display:flex;align-items:center;gap:13px;margin-bottom:25px}.brand img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}.brand strong{font-size:15px;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.2em;margin-top:4px}
+.panel{background:linear-gradient(145deg,#102d22,#081e15);border:1px solid var(--line);border-top:3px solid var(--green);padding:30px;box-shadow:0 22px 70px rgba(0,0,0,.3)}.eyebrow{color:var(--bright);font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:900}.panel h1{font-size:30px;letter-spacing:-.05em;text-transform:uppercase;margin:9px 0}.panel p{color:var(--muted);font-size:13px;line-height:1.6}
+label{display:block;margin:17px 0 7px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#c5d5cb}input{width:100%;padding:14px;background:#061810;border:1px solid var(--line);color:white;outline:none;border-radius:2px}input:focus{border-color:var(--green)}
+button,.back{width:100%;display:flex;justify-content:center;align-items:center;padding:14px;margin-top:20px;background:var(--green);border:1px solid var(--green);color:#03140d;font-weight:1000;letter-spacing:.12em;text-transform:uppercase;font-size:11px;cursor:pointer;text-decoration:none}button:hover,.back:hover{background:var(--bright)}button:disabled{opacity:.55;cursor:wait}
+.message{min-height:22px;margin-top:14px!important;font-size:12px!important}.foot{color:var(--muted);font-size:10px;text-align:center;margin-top:20px}.foot a{color:var(--bright);text-decoration:none}.secure{font-size:10px;color:#90a99a;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.account{display:none}.account.show{display:block}.login.hide{display:none}.pill{display:inline-block;padding:6px 9px;background:#09271b;color:var(--bright);border:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+</style></head>
+<body><main class="wrap">
+<a class="brand" href="index.html"><img src="assets/macovi.webp" alt="Emblema Macovi"><span><strong>MACOVI SPORT CLUB</strong><small>PLATAFORMA INTERNA</small></span></a>
+<section class="panel">
+<div class="login" id="login">
+<div class="eyebrow">Área reservada · Nível 1</div><h1>Administrador Sénior</h1><p>Acesso reservado à administração central do Macovi Sport Club.</p>
+<form id="loginForm">
+<label for="email">Gmail / endereço de e-mail</label><input id="email" type="email" autocomplete="username" required value="lucioadao@icloud.com">
+<label for="password">Palavra-passe</label><input id="password" type="password" autocomplete="current-password" required>
+<button id="submit" type="submit">Entrar na plataforma ↗</button>
+</form>
+<p class="message" id="message" aria-live="polite"></p>
+<div class="secure">A autenticação é validada pelo Supabase. Não existe criação pública de contas nesta página.</div>
+</div>
+<div class="account" id="account"><span class="pill">Sessão autenticada</span><h1 id="welcome">Acesso autorizado</h1><p id="roleText"></p><p class="message" id="setupMessage">A carregar o teu perfil...</p><button id="logout">Terminar sessão</button></div>
+</section>
+<div class="foot"><a href="index.html">← Voltar ao site público</a> · MACOVI SPORT CLUB</div>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
+const SUPABASE_URL='https://jblxmqoodtfhediqegar.supabase.co';
+const SUPABASE_KEY='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
+const expectedRole='senior_admin';
+const login=document.getElementById('login'),account=document.getElementById('account'),message=document.getElementById('message');
+async function checkSession(){
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session)return;
+ const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id').eq('user_id',session.user.id).maybeSingle();
+ if(error||!profile){message.textContent='Conta autenticada, mas ainda sem perfil autorizado. Contacta o Administrador Sénior.';await supabase.auth.signOut();return;}
+ if(profile.role!==expectedRole){message.textContent='Esta conta não tem permissão para esta área.';await supabase.auth.signOut();return;}
+ login.classList.add('hide');account.classList.add('show');
+ document.getElementById('welcome').textContent='Bem-vindo, '+(profile.full_name||session.user.email);
+ document.getElementById('roleText').textContent=profile.role==='senior_admin'?'Administrador Sénior · Acesso global':'Supervisor · Acesso limitado à modalidade atribuída';
+ document.getElementById('setupMessage').textContent='Identidade confirmada. O painel de gestão será apresentado após a activação dos módulos de acesso.';
+}
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();const btn=document.getElementById('submit');btn.disabled=true;btn.textContent='A validar...';message.textContent='';
+ const {error}=await supabase.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});
+ if(error){message.textContent='Não foi possível entrar. Confirma o e-mail e a palavra-passe ou verifica se a conta já foi activada.';await supabase.auth.signOut();}
+ else await checkSession();
+ btn.disabled=false;btn.textContent='Entrar na plataforma ↗';
+});
+document.getElementById('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
+checkSession();
+</script></body></html>
