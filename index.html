@@ -23,11 +23,28 @@
 .footer{background:#030f0b;border-top:1px solid var(--line);padding:30px 0;color:var(--muted)}.footer-row{display:flex;justify-content:space-between;align-items:center;gap:20px}.footer strong{color:white;letter-spacing:.12em}.footer small{font-size:10px}
 @media(max-width:850px){.hero-grid{grid-template-columns:1fr .7fr}.hero-crest img{width:100%}.navlinks button{padding:12px 8px;font-size:9px}.cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.shell{width:min(100% - 30px,1180px)}.topbar .shell{font-size:8px}.header{height:72px}.brand img{width:46px;height:46px}.hamb{display:block}.navlinks{display:none;position:absolute;top:72px;left:0;right:0;padding:12px 20px 20px;background:#061a14;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch}.navlinks.open{display:flex}.navlinks button{text-align:left;padding:15px;border-bottom:1px solid var(--line);font-size:11px}.navlinks .nav-cta{margin:8px 0 0;text-align:center}.hero{min-height:unset}.hero-grid{grid-template-columns:1fr;padding:65px 0 50px;gap:38px}.hero h1{font-size:clamp(44px,13vw,68px)}.hero-copy{font-size:14px}.hero-crest img{width:min(72%,260px)}.hero-crest:before{width:min(80%,300px)}.quickgrid{grid-template-columns:1fr}.quick{padding:17px 4px;border-right:0;border-bottom:1px solid var(--line)}.quick strong{font-size:19px}.section{padding:54px 0}.section-head{display:block}.section-head p{margin-top:14px}.feature-grid,.cards,.competition-grid{grid-template-columns:1fr}.page-hero{padding:48px 0 28px}.club-layout{grid-template-columns:1fr;gap:26px}.club-image{order:2}.club-text{order:1}.form-grid{grid-template-columns:1fr}.form-shell{padding:19px}.detail-panel{padding:18px}.detail-head{align-items:flex-start}.tabs{width:100%}.tabs button{flex:1;padding:10px 6px}.footer-row{display:block}.footer small{display:block;margin-top:8px}}
-.dossier{margin-top:24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.dossier-card{background:linear-gradient(145deg,#102d22,#091e16);border:1px solid var(--line);padding:22px;min-height:150px}.dossier-card h5{margin:0 0 12px;color:var(--green2);font-size:12px;letter-spacing:.16em;text-transform:uppercase}.dossier-card p{margin:0;color:var(--muted);font-size:13px}.dossier-card .data-line{padding:8px 0;border-top:1px solid var(--line);color:#d8e5dc;font-size:12px}.dossier-card .data-line span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}.dossier-note{margin-top:16px;padding:13px 16px;background:#071a12;border-left:2px solid var(--gold);color:var(--muted);font-size:11px}.dossier-fields{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.dossier-fields span{padding:6px 9px;background:#071a12;border:1px solid var(--line);font-size:10px;color:#c5d5cb}@media(max-width:650px){.dossier{grid-template-columns:1fr}.dossier-card{padding:18px}}</style></head>
+.dossier{margin-top:24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.dossier-card{background:linear-gradient(145deg,#102d22,#091e16);border:1px solid var(--line);padding:22px;min-height:150px}.dossier-card h5{margin:0 0 12px;color:var(--green2);font-size:12px;letter-spacing:.16em;text-transform:uppercase}.dossier-card p{margin:0;color:var(--muted);font-size:13px}.dossier-card .data-line{padding:8px 0;border-top:1px solid var(--line);color:#d8e5dc;font-size:12px}.dossier-card .data-line span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}.dossier-note{margin-top:16px;padding:13px 16px;background:#071a12;border-left:2px solid var(--gold);color:var(--muted);font-size:11px}.dossier-fields{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.dossier-fields span{padding:6px 9px;background:#071a12;border:1px solid var(--line);font-size:10px;color:#c5d5cb}@media(max-width:650px){.dossier{grid-template-columns:1fr}.dossier-card{padding:18px}}
+/* Acesso interno discreto — abre apenas ao clicar no emblema */
+.access-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,8,5,.78);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:20px}
+.access-backdrop.open{display:flex;animation:enter .25s ease both}
+.access-dialog{width:min(100%,440px);background:linear-gradient(145deg,#102d22,#061a14);border:1px solid rgba(25,200,117,.35);border-top:3px solid var(--green);padding:28px;box-shadow:0 25px 90px rgba(0,0,0,.5);position:relative}
+.access-dialog h2{font-size:25px;letter-spacing:-.04em;text-transform:uppercase;margin:9px 0}
+.access-dialog p{font-size:13px;color:var(--muted);margin-bottom:22px}
+.access-options{display:grid;gap:10px}
+.access-option{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:16px;background:#071b13;border:1px solid var(--line);transition:border-color .25s,transform .25s}
+.access-option:hover{border-color:var(--green);transform:translateY(-2px)}
+.access-option strong{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.access-option small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.access-option b{color:var(--green2);font-size:20px}
+.access-close{position:absolute;right:14px;top:12px;background:none;border:0;color:#c8d8ce;font-size:24px}
+.brand{cursor:pointer}
+.brand:focus-visible{outline:2px solid var(--green2);outline-offset:5px;border-radius:4px}
+@media(max-width:650px){.access-dialog{padding:24px 18px}}
+</style></head>
 <body>
 <div class="topbar"><div class="shell"><span>ANGOLA · DESDE 26 DE JULHO DE 1999</span><span>DESPORTO · FORMAÇÃO · COMUNIDADE</span></div></div>
 <header class="header"><div class="shell nav">
-<a class="brand" href="#inicio" data-view="home"><img src="assets/macovi.webp" alt="Emblema Macovi Sport Club"><span>MACOVI<small>SPORT CLUB</small></span></a>
+<a class="brand" href="#acesso-interno" id="brandAccess" aria-label="Abrir acesso interno da administração"><img src="assets/macovi.webp" alt="Emblema Macovi Sport Club"><span>MACOVI<small>SPORT CLUB</small></span></a>
 <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false">☰</button>
 <nav class="navlinks" id="navlinks">
 <button class="active" data-view="home">Início</button><button data-view="club">O Club</button><button data-view="modalidades">Modalidades</button><button data-view="competicoes">Competições</button><button data-view="inscricao" class="nav-cta">Inscrições ↗</button>
@@ -53,8 +70,30 @@
 <div class="view" id="view-competicoes"><section class="page-hero"><div class="shell"><div class="eyebrow">Acompanha o club</div><h1 class="page-title">Centro de<br>competições.</h1><p>Calendários e resultados organizados por modalidade e escalão. Apenas informação confirmada será publicada.</p></div></section><section class="section"><div class="shell competition-grid"><div class="dark-panel"><h3>Próximos jogos</h3><div class="status"><strong>Calendário em actualização</strong>As próximas partidas serão divulgadas após confirmação das datas, locais e adversários.</div></div><div class="dark-panel"><h3>Últimos resultados</h3><div class="status"><strong>Resultados oficiais</strong>Os resultados serão publicados nesta área assim que forem validados pela equipa técnica.</div></div></div></section></div>
 <div class="view" id="view-inscricao"><section class="page-hero"><div class="shell"><div class="eyebrow">Faz parte da família</div><h1 class="page-title">O teu próximo capítulo<br>começa aqui.</h1><p>Manifesta o teu interesse em integrar uma modalidade do Macovi Sport Club.</p></div></section><section class="section"><div class="shell"><div class="form-shell"><div class="form-grid"><div class="field"><label for="nome">Nome do atleta</label><input id="nome" placeholder="Nome completo"></div><div class="field"><label for="nascimento">Data de nascimento</label><input id="nascimento" type="date"></div><div class="field"><label for="responsavel">Contacto do encarregado</label><input id="responsavel" type="tel" placeholder="+244"></div><div class="field"><label for="modalidade">Modalidade pretendida</label><select id="modalidade"><option value="">Seleccionar modalidade</option><option>Xadrez</option><option>Andebol Feminino</option><option>Futsal Feminino</option><option>Futsal Masculino</option><option>Basquetebol</option></select></div></div><p class="form-note">Este formulário é uma demonstração visual. O envio e armazenamento de inscrições serão activados quando a ligação segura à base de dados estiver configurada.</p><button class="btn" id="interest">Preparar pedido ↗</button><p id="formmsg" class="form-note" aria-live="polite"></p></div></div></section></div>
 </main>
+
+<div class="access-backdrop" id="accessBackdrop" aria-hidden="true">
+ <section class="access-dialog" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+  <button class="access-close" id="closeAccess" aria-label="Fechar">×</button>
+  <div class="eyebrow">Área reservada</div>
+  <h2 id="accessTitle">Acesso interno</h2>
+  <p>Entrada exclusiva para a administração e os supervisores do Macovi Sport Club.</p>
+  <div class="access-options">
+   <a class="access-option" href="admin.html"><span><strong>Administrador Sénior</strong><small>Gestão global e controlo de acessos</small></span><b>↗</b></a>
+   <a class="access-option" href="supervisor.html"><span><strong>Supervisor</strong><small>Gestão da modalidade atribuída</small></span><b>↗</b></a>
+  </div>
+ </section>
+</div>
 <footer class="footer"><div class="shell footer-row"><div><strong>MACOVI SPORT CLUB</strong><br><small>© <span id="year"></span> · ANGOLA · TODOS OS DIREITOS RESERVADOS</small></div><small>DESPORTO · FORMAÇÃO · COMUNIDADE</small></div></footer>
 <script>
+
+const brandAccess=document.getElementById('brandAccess'),accessBackdrop=document.getElementById('accessBackdrop'),closeAccess=document.getElementById('closeAccess');
+function openAccess(){accessBackdrop.classList.add('open');accessBackdrop.setAttribute('aria-hidden','false');closeAccess.focus()}
+function hideAccess(){accessBackdrop.classList.remove('open');accessBackdrop.setAttribute('aria-hidden','true');brandAccess.focus()}
+brandAccess.addEventListener('click',e=>{e.preventDefault();openAccess()});
+closeAccess.addEventListener('click',hideAccess);
+accessBackdrop.addEventListener('click',e=>{if(e.target===accessBackdrop)hideAccess()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&accessBackdrop.classList.contains('open'))hideAccess()});
+
 const views=[...document.querySelectorAll('.view')],nav=[...document.querySelectorAll('[data-view]')],menu=document.getElementById('navlinks'),hamb=document.getElementById('hamb');
 function showView(name){views.forEach(v=>v.classList.toggle('active',v.id==='view-'+name));document.querySelectorAll('.navlinks button').forEach(b=>b.classList.toggle('active',b.dataset.view===name));menu.classList.remove('open');hamb.setAttribute('aria-expanded','false');hamb.textContent='☰';window.scrollTo({top:0,behavior:'smooth'});history.replaceState(null,'','#'+name)}
 nav.forEach(el=>el.addEventListener('click',e=>{e.preventDefault();showView(el.dataset.view)}));
