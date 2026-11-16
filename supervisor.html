@@ -20,7 +20,7 @@ button,.back{width:100%;display:flex;justify-content:center;align-items:center;p
 <button id="submit" type="submit">Entrar na plataforma ↗</button>
 </form>
 <p class="message" id="message" aria-live="polite"></p>
-<div class="secure">A autenticação é validada pelo Supabase. Não existe criação pública de contas nesta página.</div>
+<div class="secure">A autenticação é validada pelo Supabase. Não existe criação pública de contas nesta página.<br><br><a href="supervisor-activate.html" style="color:var(--bright);text-decoration:none">Primeiro acesso? Activar conta com código ↗</a></div>
 </div>
 <div class="account" id="account"><span class="pill">Sessão autenticada</span><h1 id="welcome">Acesso autorizado</h1><p id="roleText"></p><p class="message" id="setupMessage">A carregar o teu perfil...</p><button id="logout">Terminar sessão</button></div>
 </section>
@@ -36,9 +36,9 @@ const login=document.getElementById('login'),account=document.getElementById('ac
 async function checkSession(){
  const {data:{session}}=await supabase.auth.getSession();
  if(!session)return;
- const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id').eq('user_id',session.user.id).maybeSingle();
+ const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id,active').eq('user_id',session.user.id).maybeSingle();
  if(error||!profile){message.textContent='Conta autenticada, mas ainda sem perfil autorizado. Contacta o Administrador Sénior.';await supabase.auth.signOut();return;}
- if(profile.role!==expectedRole){message.textContent='Esta conta não tem permissão para esta área.';await supabase.auth.signOut();return;}
+ if(profile.role!==expectedRole||profile.active!==true){message.textContent='Esta conta não está autorizada ou encontra-se suspensa. Contacta o Administrador Sénior.';await supabase.auth.signOut();return;}
  login.classList.add('hide');account.classList.add('show');
  document.getElementById('welcome').textContent='Bem-vindo, '+(profile.full_name||session.user.email);
  document.getElementById('roleText').textContent=profile.role==='senior_admin'?'Administrador Sénior · Acesso global':'Supervisor · Acesso limitado à modalidade atribuída';
