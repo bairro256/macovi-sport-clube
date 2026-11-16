@@ -3,6 +3,15 @@ const root=document.documentElement,KEY='macovi-theme',dismiss='macovi-install-d
 const saved=localStorage.getItem(KEY);if(saved==='light'||saved==='dark')root.dataset.theme=saved;
 const holder=document.createElement('div');holder.id='macovi-pwa-tools';holder.innerHTML='<button id="macovi-theme-toggle" type="button" aria-label="Alternar tema" title="Alternar modo claro/escuro">☀</button><section id="macovi-install-card" hidden aria-live="polite"><strong>Instala o MACOVI no teu telefone</strong><p id="macovi-install-message">Adiciona o site ao ecrã inicial para abrir mais rapidamente, como uma aplicação.</p><div id="macovi-install-actions"><button id="macovi-install-action" type="button">Instalar</button><button id="macovi-install-close" class="secondary" type="button">Agora não</button></div></section>';
 document.body.appendChild(holder);
+
+// Contactos e redes sociais no rodapé de todas as páginas públicas.
+const footer=document.querySelector('footer.footer');
+if(footer&&!footer.querySelector('.macovi-footer-social')){
+ const socials=document.createElement('div');
+ socials.className='macovi-footer-social';
+ socials.innerHTML='<a class="macovi-footer-email" href="mailto:macovisportclub@gmail.com">macovisportclub@gmail.com</a><nav class="macovi-social-icons" aria-label="Redes sociais oficiais"><a href="https://www.tiktok.com/@macovisportcluboficial" target="_blank" rel="noopener noreferrer" aria-label="TikTok oficial MACOVI" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 7.1a7.2 7.2 0 0 1-4.4-1.5v8.1a6.2 6.2 0 1 1-5.3-6.1v3.4a2.9 2.9 0 1 0 2 2.8V2h3.3c.2 2.1 1.9 3.8 4.4 4.1z"/></svg></a><a href="https://www.facebook.com/share/1dMBUfyU48/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook oficial MACOVI" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.4-.1-2.4 0-4.1 1.5-4.1 4.2v2.2H7.6V13h2.7v8z"/></svg></a></nav>';
+ footer.appendChild(socials);
+}
 const themeButton=holder.querySelector('#macovi-theme-toggle');
 function syncTheme(){const light=root.dataset.theme==='light';themeButton.textContent=light?'☾':'☀';themeButton.setAttribute('aria-label',light?'Activar modo escuro':'Activar modo claro');document.querySelector('meta[name="theme-color"]')?.setAttribute('content',light?'#f4f7f4':'#061c16')}
 themeButton.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,root.dataset.theme);syncTheme()});syncTheme();
