@@ -10,10 +10,13 @@ let installPrompt=null;const card=holder.querySelector('#macovi-install-card'),m
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 function showInstall(){if(!standalone()&&!localStorage.getItem(dismiss))card.hidden=false}
 if(!standalone())setTimeout(showInstall,4500);
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;action.hidden=false;msg.textContent='Instala a aplicação MACOVI no ecrã inicial para um acesso rápido.';showInstall()});
-const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;action.hidden=false;action.textContent='Instalar agora';msg.textContent='Instala a aplicação MACOVI directamente no teu telefone.';showInstall()});
+const ua=navigator.userAgent;
+const ios=/iphone|ipad|ipod/i.test(ua)&&!window.MSStream;
+const android=/android/i.test(ua);
 if(ios&&!standalone()){action.textContent='Como instalar';msg.textContent='No Safari, toca em Partilhar e escolhe “Adicionar ao ecrã principal”.';showInstall()}
-action.addEventListener('click',async()=>{if(ios){msg.textContent='1. Toca no botão Partilhar do Safari. 2. Escolhe “Adicionar ao ecrã principal”. 3. Confirma em Adicionar.';action.hidden=true;return}if(!installPrompt){msg.textContent='No menu do navegador, escolhe “Instalar aplicação” ou “Adicionar ao ecrã inicial”.';action.hidden=true;return}installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;card.hidden=true});
+if(android&&!standalone()){action.textContent=installPrompt?'Instalar agora':'Como instalar';msg.textContent=installPrompt?'Instala a aplicação MACOVI directamente no teu Android.':'No Chrome, abre o menu ⋮ e escolhe “Instalar aplicação” ou “Adicionar ao ecrã principal”. No Samsung Internet, abre ☰, escolhe “Adicionar página a” e depois “Ecrã inicial”.';showInstall()}
+action.addEventListener('click',async()=>{if(ios){msg.textContent='1. Toca no botão Partilhar do Safari. 2. Escolhe “Adicionar ao ecrã principal”. 3. Confirma em Adicionar.';action.hidden=true;return}if(android&&!installPrompt){msg.textContent='CHROME: 1. Toca nos três pontos ⋮ no canto superior. 2. Escolhe “Instalar aplicação” ou “Adicionar ao ecrã principal”. 3. Confirma.\n\nSAMSUNG INTERNET: 1. Abre o menu ☰. 2. Escolhe “Adicionar página a”. 3. Selecciona “Ecrã inicial”.';action.hidden=true;return}if(!installPrompt){msg.textContent='Abre o menu do navegador e procura “Instalar aplicação” ou “Adicionar ao ecrã principal”.';action.hidden=true;return}installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;card.hidden=true});
 holder.querySelector('#macovi-install-close').addEventListener('click',()=>{card.hidden=true;localStorage.setItem(dismiss,'1')});
 window.addEventListener('appinstalled',()=>{card.hidden=true;localStorage.setItem(dismiss,'1')});
 if('serviceWorker'in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('MACOVI offline:',err)))}
