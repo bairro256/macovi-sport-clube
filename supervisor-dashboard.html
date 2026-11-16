@@ -9,7 +9,7 @@
 <nav class="tabs" id="tabs" aria-label="Secções de gestão">
 <button class="active" data-section="athletes">Atletas</button><button data-section="coaches">Equipa técnica</button><button data-section="events">Eventos</button><button data-section="matches">Jogos e resultados</button><button data-section="standings">Classificações</button>
 </nav>
-<div class="toolbar"><div><span class="eyebrow">Filtro de escalão</span><div class="muted">Escolhe o escalão para consultar e gerir os registos.</div></div><select id="ageFilter"><option value="juvenis">Juvenis · Sub-17</option><option value="juniores">Juniores · Sub-20</option><option value="todos">Todos os escalões</option></select></div>
+<div class="toolbar"><div><span class="eyebrow">Filtro de escalão</span><div class="muted">Escolhe o escalão para consultar e gerir os registos.</div></div><select id="ageFilter"><option value="juvenis">Juvenis · Sub-17</option><option value="juniores">Juniores · Sub-20</option><option value="seniores" id="senioresAgeFilter" hidden>Seniores</option><option value="todos">Todos os escalões</option></select></div>
 <div class="toolbar" id="branchToolbar" hidden><div><span class="eyebrow">Filial do Xadrez</span><div class="muted">Filtra atletas, jogos e classificações por filial.</div></div><select id="branchFilter"><option value="todas">Todas as filiais</option><option>Luanda</option><option>Uíge</option><option>Huíla</option><option>Namibe</option><option>Portugal</option></select></div>
 <section class="workspace"><div class="panel"><h2 id="listTitle">Atletas registados</h2><div class="table-wrap" id="records"><div class="empty">A carregar registos da modalidade...</div></div></div>
 <div class="panel"><h2 id="formTitle">Adicionar atleta</h2><form id="recordForm"><div id="fields" class="field-grid"></div><div class="form-actions"><button id="saveButton" type="submit">Guardar registo</button><button type="button" id="cancelEdit" class="secondary hidden">Cancelar edição</button></div><p class="message" id="formMessage" aria-live="polite"></p></form><div class="notice">Os registos ficam associados exclusivamente à tua modalidade. Os dados pessoais, incluindo data de nascimento, não são apresentados no site público. Antes de publicar, confirma nomes, resultados, datas e fotografias.</div></div></section>
@@ -35,7 +35,7 @@ const configs={
 let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[],uploadedPhotoUrl=null;
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':'Todos os escalões';}
+function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':v==='seniores'?'Seniores':'Todos os escalões';}
 function visibleFields(){
  const fields=configs[section].fields;
  if(!modality)return fields;
@@ -51,7 +51,7 @@ async function boot(){
  if(error||!p||p.role!=='supervisor'||p.active!==true||!p.modality_id){await supabase.auth.signOut();location.replace('supervisor.html?access=denied');return;}profile=p;
  const {data:m,error:me}=await supabase.from('modalities').select('id,name,slug,active').eq('id',p.modality_id).eq('active',true).maybeSingle();
  if(me||!m){$('modalityName').textContent='A modalidade atribuída está inactiva ou indisponível.';return;}modality=m;
- $('welcome').textContent='Olá, '+(p.full_name||'Supervisor');$('modalityName').textContent=m.name+' · Acesso exclusivo à modalidade atribuída';$('branchToolbar').hidden=m.slug!=='xadrez';await loadRows();
+ $('welcome').textContent='Olá, '+(p.full_name||'Supervisor');$('modalityName').textContent=m.name+' · Acesso exclusivo à modalidade atribuída';$('branchToolbar').hidden=m.slug!=='xadrez';$('senioresAgeFilter').hidden=m.slug!=='xadrez';await loadRows();
 }
 async function loadRows(){
  const cfg=configs[section];$('listTitle').textContent=cfg.title+' · '+modality.name;
@@ -81,12 +81,12 @@ function renderForm(){
  const cfg=configs[section];$('formTitle').textContent=(editingId?'Editar ':'Adicionar ')+cfg.singular;
  const row=editingId?rows.find(x=>x.id===editingId):null;
  $('fields').innerHTML=visibleFields().map(f=>{
- const [key,name,type,required,opts]=f,v=row?.[key]??(key==='branch'&&modality.slug==='xadrez'&&$('branchFilter').value!=='todas'?$('branchFilter').value:null);
+ const [key,name,type,required,opts]=f,v=row?.[key]??(key==='branch'&&modality.slug==='xadrez'&&$('branchFilter').value!=='todas'?$('branchFilter').value:null);\n const choices=key==='age_group'&&modality.slug==='xadrez'?[...opts,'seniores']:opts;
  if(type==='checkbox'){const checked=v===undefined?(key==='active'&&(section==='athletes'||section==='coaches')):v===true;return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(checked?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';}
  let input='';
  if(type==='file')input='<input id="f_'+key+'" type="file" accept="image/jpeg,image/png,image/webp">'+(v?'<div class="muted">Fotografia actual: <a href="'+esc(v)+'" target="_blank" rel="noopener">ver imagem</a></div>':'');
  else if(type==='textarea')input='<textarea id="f_'+key+'" '+(required?'required':'')+'>'+esc(v||'')+'</textarea>';
- else if(type==='select')input='<select id="f_'+key+'" '+(required?'required':'')+'><option value="">Seleccionar</option>'+opts.map(o=>'<option value="'+esc(o)+'" '+(v===o?'selected':'')+'>'+esc(o==='juvenis'?'Juvenis · Sub-17':o==='juniores'?'Juniores · Sub-20':o==='masculino'?'Masculino':o==='feminino'?'Feminino':o==='outro'?'Outro':o)+'</option>').join('')+'</select>';
+ else if(type==='select')input='<select id="f_'+key+'" '+(required?'required':'')+'><option value="">Seleccionar</option>'+choices.map(o=>'<option value="'+esc(o)+'" '+(v===o?'selected':'')+'>'+esc(o==='juvenis'?'Juvenis · Sub-17':o==='juniores'?'Juniores · Sub-20':o==='seniores'?'Seniores':o==='masculino'?'Masculino':o==='feminino'?'Feminino':o==='outro'?'Outro':o)+'</option>').join('')+'</select>';
  else {let value=v??'';if(type==='datetime-local'&&value){const d=new Date(value);value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
  input='<input id="f_'+key+'" type="'+type+'" value="'+esc(value)+'" '+(required?'required':'')+'>';}
  return '<div class="field '+(type==='textarea'?'wide':'')+'"><label for="f_'+key+'">'+esc(name)+'</label>'+input+'</div>';
