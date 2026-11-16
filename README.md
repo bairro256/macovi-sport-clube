@@ -1,2 +1,45 @@
-# Macovi Sport Clube — Site Oficial\n\nWebsite institucional do Macovi Sport Clube.\n\n## Publicação\n\nO site é publicado automaticamente no GitHub Pages através do workflow **Publicar site Macovi Sport Clube** (`.github/workflows/deploy.yml`) sempre que há alterações na branch `main`.\n\n## Estrutura inicial\n\n- `index.html` — página inicial responsiva, identidade do clube, modalidades, competições e contacto para inscrições.\n- `.github/workflows/deploy.yml` — integração de publicação no GitHub Pages.\n\n## Próximas etapas\n\n- Substituir o emblema provisório pelo símbolo oficial e adicionar fotografias autorizadas.\n- Estruturar dossiers interactivos para as cinco modalidades e os dois escalões (Juvenis/Sub-17 e Juniores/Sub-20), com áreas de plantel, equipa técnica, calendário e classificação.
-- Preparar campos específicos por modalidade: ratings e mesas no xadrez; camisolas, posições e golos nos desportos de pavilhão; altura, posições e pontos no basquetebol.\n- Ligar inscrições, atletas, calendários, resultados e classificações a uma base de dados e área administrativa.\n- Configurar contactos oficiais e redes sociais do clube.\n\nOs calendários e resultados só devem ser publicados após confirmação pelos responsáveis do clube.\n
+# MACOVI SPORT CLUB — Site Oficial
+
+Website institucional do MACOVI SPORT CLUB, publicado gratuitamente no GitHub Pages.
+
+## Publicação
+
+O site é publicado automaticamente a partir da branch `main` pelo workflow `.github/workflows/deploy.yml`.
+
+## Estrutura
+
+- `index.html` — site público, navegação, modalidades, escalões e dossiers.
+- `data/club.json` — fonte dos dados desportivos apresentados no site.
+- `assets/macovi.webp` — emblema utilizado pelo site.
+- `.github/workflows/deploy.yml` — publicação automática no GitHub Pages.
+
+## Como actualizar os dados sem pagar
+
+1. Abrir o repositório no GitHub.
+2. Entrar em `data/club.json`.
+3. Carregar no lápis (**Edit this file**).
+4. Actualizar os dados da modalidade e do escalão pretendidos.
+5. Carregar em **Commit changes**. O GitHub Pages publica a actualização automaticamente.
+
+É possível fazer estes passos no telemóvel através do navegador ou da aplicação GitHub.
+
+## Estrutura dos dados
+
+Cada modalidade contém os escalões `juvenis` (Sub-17) e `juniores` (Sub-20). Em cada escalão podem ser preenchidos:
+
+- `plantel`: lista de atletas. Cada atleta tem `nome` e `dados`.
+- `equipaTecnica`: lista com `nome` e `funcao`.
+- `jogos`: lista com `data`, `hora`, `adversario`, `local`, `resultado` e `estado`.
+- `classificacao`: lista com `posicao`, `equipa`, `jogos`, `vitorias`, `empates`, `derrotas` e `pontos`.
+
+No xadrez, os campos em `dados` podem incluir título/categoria, rating FIDE, rating nacional e mesa. No andebol e futsal podem incluir número de camisola, posição, golos e jogos disputados. No basquetebol podem incluir número de camisola, posição, altura e pontos.
+
+## Privacidade e segurança
+
+O site é público. Não colocar números de telefone privados, moradas, documentos, datas de nascimento completas, dados médicos ou outros dados pessoais sensíveis no ficheiro público. Para atletas menores, publicar fotografias e informações pessoais apenas com autorização dos encarregados de educação e do clube.
+
+## Custos e limites
+
+Esta solução não cria uma base de dados paga nem um painel administrativo com autenticação. A actualização é feita pelo editor do GitHub, e os dados publicados no site são públicos. Não introduzir credenciais, palavras-passe ou chaves secretas neste repositório.
+
+Os dados desportivos devem ser confirmados pelos responsáveis do MACOVI SPORT CLUB antes da publicação.
