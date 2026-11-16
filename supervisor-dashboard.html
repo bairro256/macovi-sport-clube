@@ -97,7 +97,7 @@ function formPayload(){
  for(const f of visibleFields()){const [key,,type]=f,el=$('f_'+key);if(type==='file')continue;if(type==='checkbox')data[key]=el.checked;else{let v=el.value.trim();if(type==='number')v=v===''?null:Number(v);else if(type==='datetime-local')v=v?new Date(v).toISOString():null;else if(v==='')v=null;data[key]=v;}}
  if(!editingId)data.created_by=user.id;data.updated_by=user.id;
  if(section==='athletes'&&!editingId)data.display_order=0;
- if(section==='matches'&&data.macovi_score!==null&&data.opponent_score!==null&&data.result==='por_realizar'){
+ if(section==='matches'&&data.macovi_score!==null&&data.opponent_score!==null){
   data.result=data.macovi_score>data.opponent_score?'vitoria':data.macovi_score<data.opponent_score?'derrota':'empate';
  }
  return data;
