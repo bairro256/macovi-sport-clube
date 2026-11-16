@@ -39,7 +39,7 @@
 <h2 class="section-title">Histórico de auditoria</h2><section class="panel"><div class="top"><div><strong>Últimas acções registadas</strong><p class="muted">Alterações a atletas, treinadores, eventos, jogos, classificações e gestão de supervisores.</p></div><span class="pill">Registo automático</span></div><div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Responsável</th><th>Acção</th><th>Registo afectado</th></tr></thead><tbody id="auditRows"><tr><td colspan="4" class="muted">A carregar histórico...</td></tr></tbody></table></div></section>
 <div class="foot"><a href="index.html">← Voltar ao site público</a> · MACOVI SPORT CLUB</div>
 </div></main>
-<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const SUPABASE_URL='https://jblxmqoodtfhediqegar.supabase.co';
@@ -57,24 +57,14 @@ async function loadNews(){
  box.innerHTML=(data||[]).map(n=>'<article class="news-item">'+(n.image_path?'<img src="'+escapeHtml(supabase.storage.from('macovi-photos').getPublicUrl(n.image_path).data.publicUrl)+'" alt="">':'')+'<div class="news-item-main"><small>'+escapeHtml(n.category)+' · '+(n.published?'<span class="news-status">Publicada</span>':'Rascunho')+(n.video_path?' · Vídeo anexado':'')+'</small><strong>'+escapeHtml(n.title)+'</strong><p>'+escapeHtml(n.summary||'Sem resumo')+'</p></div><div class="news-item-actions"><button class="small-action" data-news-edit="'+n.id+'">Editar</button><button class="small-action danger" data-news-delete="'+n.id+'">Eliminar</button></div></article>').join('')||'<div class="muted">Ainda não existem notícias. Cria a primeira publicação acima.</div>';
 }
 
-function uploadNewsVideo(file,path){
- return new Promise(async(resolve,reject)=>{
-  const {data:{session},error}=await supabase.auth.getSession();
-  if(error||!session?.access_token){reject(error||new Error('Sessão expirada. Volta a iniciar sessão.'));return;}
-  if(!window.tus?.Upload){reject(new Error('Biblioteca de envio de vídeo não carregou. Actualiza a página e tenta novamente.'));return;}
-  const upload=new window.tus.Upload(file,{
-   endpoint:'https://jblxmqoodtfhediqegar.storage.supabase.co/storage/v1/upload/resumable',
-   retryDelays:[0,3000,5000,10000,20000],
-   headers:{authorization:'Bearer '+session.access_token,'x-upsert':'false'},
-   uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,
-   metadata:{bucketName:'macovi-photos',objectName:path,contentType:file.type,cacheControl:'3600'},
-   chunkSize:6*1024*1024,
-   onError:error=>reject(error),
-   onProgress:(uploaded,total)=>{const pct=Math.round(uploaded/total*100);document.getElementById('videoProgress').hidden=false;document.getElementById('videoProgressBar').style.width=pct+'%';document.getElementById('newsMessage').textContent='A carregar vídeo… '+pct+'%';},
-   onSuccess:()=>resolve(path)
-  });
-  try{const previous=await upload.findPreviousUploads();if(previous.length)upload.resumeFromPreviousUpload(previous[0]);upload.start();}catch(error){reject(error);}
+async function uploadNewsVideo(file,path){
+ const {error}=await supabase.storage.from('macovi-photos').upload(path,file,{
+  contentType:file.type,
+  cacheControl:'3600',
+  upsert:false
  });
+ if(error) throw error;
+ return path;
 }
 
 async function saveNews(e){
