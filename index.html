@@ -132,9 +132,46 @@ function renderAge(){
   panel.innerHTML='<h4>'+title+' — '+esc(currentSport)+'</h4><div class="dossier">'+cards+'</div><div class="dossier-note">Os dados apresentados são carregados do ficheiro oficial do clube. Campos vazios significam que a informação ainda não foi fornecida ou validada.</div>';
   requestAnimationFrame(()=>panel.classList.remove('changing'));
 }
-fetch('./data/club.json').then(r=>{if(!r.ok)throw new Error('Não foi possível carregar os dados');return r.json()}).then(data=>{clubData=data;renderAge()}).catch(()=>{clubData=null;renderAge()});
+clubData={modalidades:{}};renderAge();
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{if(currentAge===b.dataset.age)return;currentAge=b.dataset.age;document.querySelectorAll('.tabs button').forEach(t=>{t.classList.toggle('active',t===b);t.setAttribute('aria-selected',String(t===b))});renderAge()}));
 document.getElementById('interest').addEventListener('click',()=>{const n=document.getElementById('nome').value.trim(),m=document.getElementById('modalidade').value;document.getElementById('formmsg').textContent=n&&m?'Pedido preparado. O envio online será disponibilizado após a activação da plataforma de inscrições.':'Preenche o nome do atleta e selecciona uma modalidade.'});
 document.getElementById('year').textContent=new Date().getFullYear();
 const initial=location.hash.replace('#','');if(['home','club','modalidades','competicoes','inscricao'].includes(initial))showView(initial);
-</script></body></html>
+</script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
+const sb=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY');
+const blankAge=()=>({plantel:[],equipaTecnica:[],jogos:[],classificacao:[]});
+function mapAthlete(a){
+ const dados={'Título / categoria':a.chess_title,'Rating FIDE':a.fide_rating,'Rating nacional':a.national_rating,'Tabuleiro / mesa':a.board_number,'Clube':a.club_name,'Número de camisola':a.jersey_number,'Posição':a.sport_role,'Altura':a.height_cm?String(a.height_cm)+' cm':null};
+ return {nome:a.full_name,foto:a.photo_path,dados:dados};
+}
+function mapCoach(p){return {nome:p.full_name,funcao:p.role_title,foto:p.photo_path};}
+function mapMatch(m){
+ const state={vitoria:'Vitória',empate:'Empate',derrota:'Derrota',por_realizar:'Por realizar'};
+ return {data:m.starts_at?new Date(m.starts_at).toLocaleDateString('pt-AO'):'Data por definir',hora:m.starts_at?new Date(m.starts_at).toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'}):'',adversario:m.opponent,local:m.venue,resultado:(m.macovi_score??'—')+' : '+(m.opponent_score??'—'),estado:state[m.result]||'Resultado por confirmar'};
+}
+function mapEvent(e){return {data:e.starts_at?new Date(e.starts_at).toLocaleDateString('pt-AO'):'Data por definir',hora:e.starts_at?new Date(e.starts_at).toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'}):'',adversario:e.title,local:e.venue,estado:e.event_type};}
+async function loadClubData(){
+ const mods=await sb.from('modalities').select('id,slug,name').eq('active',true).order('name');
+ if(mods.error)throw mods.error;
+ const results=await Promise.all([
+  sb.from('athletes').select('id,modality_id,age_group,full_name,sex,photo_path,club_name,sport_role,jersey_number,height_cm,chess_title,fide_rating,national_rating,board_number,biography,display_order').eq('active',true).order('display_order').order('full_name'),
+  sb.from('coaches').select('id,modality_id,age_group,full_name,role_title,photo_path,biography').eq('active',true).order('full_name'),
+  sb.from('events').select('id,modality_id,age_group,title,event_type,venue,starts_at,ends_at,description').eq('published',true).order('starts_at'),
+  sb.from('matches').select('id,modality_id,age_group,opponent,competition,venue,starts_at,macovi_score,opponent_score,result,notes').eq('published',true).order('starts_at'),
+  sb.from('standings').select('id,modality_id,age_group,competition,team_name,played,wins,draws,losses,points,position,season').eq('published',true).order('position')
+ ]);
+ for(const result of results)if(result.error)throw result.error;
+ const data={modalidades:{}},byId={};
+ for(const m of mods.data||[]){data.modalidades[m.slug]={escaloes:{juvenis:blankAge(),juniores:blankAge()}};byId[m.id]=m.slug;}
+ for(const a of results[0].data||[]){const age=data.modalidades[byId[a.modality_id]]?.escaloes?.[a.age_group];if(age)age.plantel.push(mapAthlete(a));}
+ for(const p of results[1].data||[]){const age=data.modalidades[byId[p.modality_id]]?.escaloes?.[p.age_group||'juvenis'];if(age)age.equipaTecnica.push(mapCoach(p));}
+ for(const m of results[3].data||[]){const age=data.modalidades[byId[m.modality_id]]?.escaloes?.[m.age_group||'juvenis'];if(age)age.jogos.push(mapMatch(m));}
+ for(const e of results[2].data||[]){const age=data.modalidades[byId[e.modality_id]]?.escaloes?.[e.age_group||'juvenis'];if(age)age.jogos.push(mapEvent(e));}
+ for(const s of results[4].data||[]){const age=data.modalidades[byId[s.modality_id]]?.escaloes?.[s.age_group||'juvenis'];if(age)age.classificacao.push({posicao:s.position,equipa:s.team_name,jogos:s.played,vitorias:s.wins,empates:s.draws,derrotas:s.losses,pontos:s.points});}
+ clubData=data;renderAge();
+}
+loadClubData().catch(err=>{console.error('MACOVI public data:',err);clubData={modalidades:{}};renderAge();});
+</script>
+</body></html>
