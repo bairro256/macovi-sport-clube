@@ -1,0 +1,102 @@
+{
+  "clube": "MACOVI SPORT CLUB",
+  "fundacao": "1999-07-26",
+  "ultimaActualizacao": null,
+  "modalidades": {
+    "xadrez": {
+      "nome": "Xadrez",
+      "escaloes": {
+        "juvenis": {
+          "designacao": "Juvenis · Sub-17",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        },
+        "juniores": {
+          "designacao": "Juniores · Sub-20",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        }
+      }
+    },
+    "andebol-feminino": {
+      "nome": "Andebol Feminino",
+      "escaloes": {
+        "juvenis": {
+          "designacao": "Juvenis · Sub-17",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        },
+        "juniores": {
+          "designacao": "Juniores · Sub-20",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        }
+      }
+    },
+    "futsal-feminino": {
+      "nome": "Futsal Feminino",
+      "escaloes": {
+        "juvenis": {
+          "designacao": "Juvenis · Sub-17",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        },
+        "juniores": {
+          "designacao": "Juniores · Sub-20",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        }
+      }
+    },
+    "futsal-masculino": {
+      "nome": "Futsal Masculino",
+      "escaloes": {
+        "juvenis": {
+          "designacao": "Juvenis · Sub-17",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        },
+        "juniores": {
+          "designacao": "Juniores · Sub-20",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        }
+      }
+    },
+    "basquetebol": {
+      "nome": "Basquetebol",
+      "escaloes": {
+        "juvenis": {
+          "designacao": "Juvenis · Sub-17",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        },
+        "juniores": {
+          "designacao": "Juniores · Sub-20",
+          "plantel": [],
+          "equipaTecnica": [],
+          "jogos": [],
+          "classificacao": []
+        }
+      }
+    }
+  }
+}
