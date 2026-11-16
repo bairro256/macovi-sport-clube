@@ -28,9 +28,9 @@ const configs={
  events:{table:'events',title:'Eventos',singular:'evento',fields:[
   ['title','Título do evento','text',true],['age_group','Escalão','select',false,['juvenis','juniores']],['event_type','Tipo de evento','text',true],['venue','Local / recinto','text',false],['starts_at','Data e hora de início','datetime-local',false],['ends_at','Data e hora de fim','datetime-local',false],['description','Descrição','textarea',false],['published','Publicar no site','checkbox',false]]},
  matches:{table:'matches',title:'Jogos e resultados',singular:'jogo',fields:[
-  ['opponent','Adversário','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['competition','Competição','text',false],['venue','Local','text',false],['starts_at','Data e hora','datetime-local',false],['macovi_score','Resultado Macovi','number',false],['opponent_score','Resultado adversário','number',false],['result','Estado / resultado','select',false,['por_realizar','vitoria','empate','derrota']],['notes','Notas','textarea',false],['published','Publicar no site','checkbox',false]]},
+  ['opponent','Adversário','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['branch','Filial do Xadrez','select',true,['Luanda','Uíge','Huíla','Namibe','Portugal']],['competition','Competição','text',false],['venue','Local','text',false],['starts_at','Data e hora','datetime-local',false],['macovi_score','Resultado Macovi','number',false],['opponent_score','Resultado adversário','number',false],['result','Estado / resultado','select',false,['por_realizar','vitoria','empate','derrota']],['notes','Notas','textarea',false],['published','Publicar no site','checkbox',false]]},
  standings:{table:'standings',title:'Classificações',singular:'linha de classificação',fields:[
-  ['competition','Competição','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['team_name','Equipa','text',true],['position','Posição','number',false],['played','Jogos disputados','number',true],['wins','Vitórias','number',true],['draws','Empates','number',true],['losses','Derrotas','number',true],['points','Pontos','number',true],['season','Época','text',false],['published','Publicar no site','checkbox',false]]}
+  ['competition','Competição','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['branch','Filial do Xadrez','select',true,['Luanda','Uíge','Huíla','Namibe','Portugal']],['team_name','Equipa','text',true],['position','Posição','number',false],['played','Jogos disputados','number',true],['wins','Vitórias','number',true],['draws','Empates','number',true],['losses','Derrotas','number',true],['points','Pontos','number',true],['season','Época','text',false],['published','Publicar no site','checkbox',false]]}
 };
 let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[],uploadedPhotoUrl=null;
 const $=id=>document.getElementById(id);
@@ -38,11 +38,10 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':'Todos os escalões';}
 function visibleFields(){
  const fields=configs[section].fields;
- if(section!=='athletes'||!modality)return fields;
- const hidden=modality.slug==='xadrez'
-  ? ['sport_role','jersey_number','height_cm']
-  : ['chess_title','fide_rating','national_rating','board_number','club_name'];
- if(modality.slug!=='basquetebol')hidden.push('height_cm');
+ if(!modality)return fields;
+ if(modality.slug!=='xadrez')return fields.filter(f=>f[0]!=='branch');
+ if(section!=='athletes')return fields;
+ const hidden=['sport_role','jersey_number','height_cm'];
  return fields.filter(f=>!hidden.includes(f[0]));
 }
 function dateValue(v){if(!v)return '';const d=new Date(v);return isNaN(d)?'':d.toLocaleString('pt-AO',{dateStyle:'short',timeStyle:'short'});}
