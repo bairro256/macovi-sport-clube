@@ -26,3 +26,13 @@ html[data-theme="light"] .navlinks .nav-cta,html[data-theme="light"] .btn,html[d
 html[data-theme="light"] #macovi-theme-toggle,html[data-theme="light"] #macovi-install-open{background:#fff;color:#17251e}
 @media(max-width:650px){#macovi-pwa-tools{right:12px;bottom:12px}#macovi-install-card{margin-bottom:2px}}
 @media(prefers-reduced-motion:no-preference){#macovi-install-card{animation:macoviPop .25s ease-out}@keyframes macoviPop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
+
+html[data-theme="light"] .quickbar,html[data-theme="light"] .quick,html[data-theme="light"] .development-area,html[data-theme="light"] .development-item,html[data-theme="light"] .club-image,html[data-theme="light"] .access-dialog,html[data-theme="light"] .access-option,html[data-theme="light"] .dossier-note{background:#fff!important;color:#17251e!important;border-color:#d5e0d7!important}
+html[data-theme="light"] .access-option small,html[data-theme="light"] .dossier-note,html[data-theme="light"] .form-note,html[data-theme="light"] .field label{color:#52645a!important}
+html[data-theme="light"] .access-backdrop{background:rgba(20,35,25,.35)!important}
+html[data-theme="light"] .tabs button{color:#52645a!important}
+html[data-theme="light"] .tabs button.active{color:#04150d!important}
+html[data-theme="light"] .development-head p{color:#52645a!important}
+html[data-theme="light"] .feature .arrow{color:#936d20!important;border-color:#c7a45b!important}
+html[data-theme="light"] .feature .num,html[data-theme="light"] .sport-story h3,html[data-theme="light"] .sport-icon{color:#087b48!important}
+html[data-theme="light"] [style*="background"]{background:#e8eee9!important;color:#17251e!important}
