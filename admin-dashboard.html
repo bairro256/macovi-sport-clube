@@ -35,7 +35,8 @@ async function loadDashboard(profile){
   supabase.from('athletes').select('id',{count:'exact',head:true})
  ]);
  if(mods.error){document.getElementById('sports').innerHTML='<div class="sport">Erro ao carregar modalidades: '+escapeHtml(mods.error.message)+'. Confirma a ligação à base de dados.</div>';document.getElementById('modalityCount').textContent='Erro';return;}
- const modalities=mods.data||[], supervisors=sups.data||[];\n document.getElementById('supervisorModality').innerHTML='<option value="">Selecciona a modalidade</option>'+modalities.filter(m=>m.active).map(m=>'<option value="'+m.id+'">'+escapeHtml(m.name)+'</option>').join('');
+ const modalities=mods.data||[], supervisors=sups.data||[];
+ document.getElementById('supervisorModality').innerHTML='<option value="">Selecciona a modalidade</option>'+modalities.filter(m=>m.active).map(m=>'<option value="'+m.id+'">'+escapeHtml(m.name)+'</option>').join('');
  document.getElementById('modalityCount').textContent=modalities.length;
  document.getElementById('supervisorCount').textContent=sups.error?'—':supervisors.length;
  document.getElementById('athleteCount').textContent=athletes.error?'—':(athletes.count??0);
