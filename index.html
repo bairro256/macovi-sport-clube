@@ -168,7 +168,7 @@ async function loadClubData(){
  for(const a of results[0].data||[]){const age=data.modalidades[byId[a.modality_id]]?.escaloes?.[a.age_group];if(age)age.plantel.push(mapAthlete(a));}
  for(const p of results[1].data||[]){const age=data.modalidades[byId[p.modality_id]]?.escaloes?.[p.age_group||'juvenis'];if(age)age.equipaTecnica.push(mapCoach(p));}
  for(const m of results[3].data||[]){const age=data.modalidades[byId[m.modality_id]]?.escaloes?.[m.age_group||'juvenis'];if(age)age.jogos.push(mapMatch(m));}
- for(const e of results[2].data||[]){const age=data.modalidades[byId[e.modality_id]]?.escaloes?.[e.age_group||'juvenis'];if(age)age.jogos.push(mapEvent(e));}
+ for(const e of results[2].data||[]){const groups=e.age_group?[e.age_group]:['juvenis','juniores'];for(const group of groups){const age=data.modalidades[byId[e.modality_id]]?.escaloes?.[group];if(age)age.jogos.push(mapEvent(e));}}
  for(const s of results[4].data||[]){const age=data.modalidades[byId[s.modality_id]]?.escaloes?.[s.age_group||'juvenis'];if(age)age.classificacao.push({posicao:s.position,equipa:s.team_name,jogos:s.played,vitorias:s.wins,empates:s.draws,derrotas:s.losses,pontos:s.points});}
  clubData=data;renderAge();
 }
