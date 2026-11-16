@@ -62,7 +62,38 @@ hamb.addEventListener('click',()=>{const open=menu.classList.toggle('open');hamb
 let currentSport='Xadrez',currentAge='juvenis';const detail=document.getElementById('detail'),panel=document.getElementById('agepanel');
 document.querySelectorAll('.sport-card').forEach(card=>card.addEventListener('click',()=>{currentSport=card.dataset.sport;currentAge='juvenis';document.getElementById('sporttitle').textContent=currentSport;document.querySelectorAll('.tabs button').forEach(b=>{b.classList.toggle('active',b.dataset.age==='juvenis');b.setAttribute('aria-selected',String(b.dataset.age==='juvenis'))});renderAge();detail.classList.add('open');detail.scrollIntoView({behavior:'smooth',block:'nearest'})}));
 const sportFields={'Xadrez':['Título / categoria','Rating FIDE','Rating nacional','Tabuleiro / mesa','Clube'],'Andebol Feminino':['Número de camisola','Posição','Golos','Jogos disputados'],'Futsal Feminino':['Número de camisola','Posição','Golos','Jogos disputados'],'Futsal Masculino':['Número de camisola','Posição','Golos','Jogos disputados'],'Basquetebol':['Número de camisola','Posição','Altura','Pontos']};
-function renderAge(){panel.classList.add('changing');setTimeout(()=>{const title=currentAge==='juvenis'?'Juvenis · Sub-17':'Juniores · Sub-20';const fields=sportFields[currentSport]||[];const chips=fields.map(x=>'<span>'+x+'</span>').join('');panel.innerHTML='<h4>'+title+' — '+currentSport+'</h4><div class="dossier"><article class="dossier-card"><h5>01 · Plantel de atletas</h5><p>Fichas individuais com os dados confirmados pelo responsável da modalidade.</p><div class="dossier-fields">'+chips+'</div><div class="data-line"><span>Estado do plantel</span>Por preencher com dados oficiais</div></article><article class="dossier-card"><h5>02 · Equipa técnica</h5><p>Treinador principal, adjuntos e responsáveis do escalão.</p><div class="data-line"><span>Equipa técnica</span>Por confirmar</div></article><article class="dossier-card"><h5>03 · Calendário e jogos</h5><p>Data, hora, adversário, recinto e estado de cada partida.</p><div class="data-line"><span>Próximos jogos</span>Sem partidas confirmadas publicadas</div></article><article class="dossier-card"><h5>04 · Classificação</h5><p>Posição, jogos, vitórias, empates, derrotas e pontos, conforme o regulamento.</p><div class="data-line"><span>Tabela oficial</span>A aguardar resultados validados</div></article></div><div class="dossier-note">Informação ainda não disponibilizada. Nenhum atleta, treinador, rating, jogo ou resultado foi inventado. Os campos serão preenchidos apenas com dados confirmados pelo club.</div>';panel.classList.remove('changing')},180)}
+let clubData=null;
+const sportSlugs={'Xadrez':'xadrez','Andebol Feminino':'andebol-feminino','Futsal Feminino':'futsal-feminino','Futsal Masculino':'futsal-masculino','Basquetebol':'basquetebol'};
+function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function emptyCard(title,description,message){return '<article class="dossier-card"><h5>'+title+'</h5><p>'+description+'</p><div class="data-line">'+message+'</div></article>';}
+function renderAge(){
+  panel.classList.add('changing');
+  const sport=clubData?.modalidades?.[sportSlugs[currentSport]];
+  const age=sport?.escaloes?.[currentAge];
+  const title=currentAge==='juvenis'?'Juvenis · Sub-17':'Juniores · Sub-20';
+  const fields=sportFields[currentSport]||[];
+  const chips=fields.map(x=>'<span>'+esc(x)+'</span>').join('');
+  let cards='';
+  if(!age){
+    cards=emptyCard('Dados do escalão','Área de informação do escalão.','Dados ainda não publicados.');
+  }else{
+    const athletes=Array.isArray(age.plantel)?age.plantel:[];
+    const staff=Array.isArray(age.equipaTecnica)?age.equipaTecnica:[];
+    const fixtures=Array.isArray(age.jogos)?age.jogos:[];
+    const standings=Array.isArray(age.classificacao)?age.classificacao:[];
+    const athleteRows=athletes.length?athletes.map(a=>'<div class="data-line"><strong>'+esc(a.nome||'Atleta')+'</strong><div class="dossier-fields">'+fields.map(field=>'<span>'+esc(field)+': '+esc((a.dados||{})[field]||'—')+'</span>').join('')+'</div></div>').join(''): '<div class="data-line">Plantel por publicar pelo responsável da modalidade.</div>';
+    const staffRows=staff.length?staff.map(p=>'<div class="data-line"><strong>'+esc(p.nome||'')+'</strong><span>'+esc(p.funcao||'Equipa técnica')+'</span></div>').join(''):'<div class="data-line">Equipa técnica por confirmar.</div>';
+    const fixtureRows=fixtures.length?fixtures.map(j=>'<div class="data-line"><strong>'+esc(j.data||'Data por definir')+' · '+esc(j.adversario||'Adversário por confirmar')+'</strong><span>'+esc([j.hora,j.local,j.resultado,j.estado].filter(Boolean).join(' · '))+'</span></div>').join(''):'<div class="data-line">Calendário por publicar.</div>';
+    const standingRows=standings.length?standings.map((t,i)=>'<div class="data-line"><strong>'+esc(t.posicao||i+1)+'. '+esc(t.equipa||'Equipa')+'</strong><span>J: '+esc(t.jogos??'—')+' · V: '+esc(t.vitorias??'—')+' · E: '+esc(t.empates??'—')+' · D: '+esc(t.derrotas??'—')+' · Pts: '+esc(t.pontos??'—')+'</span></div>').join(''):'<div class="data-line">Classificação por actualizar após resultados oficiais.</div>';
+    cards='<article class="dossier-card"><h5>01 · Plantel de atletas</h5><p>Fichas individuais e dados desportivos.</p><div class="dossier-fields">'+chips+'</div>'+athleteRows+'</article>'+
+      '<article class="dossier-card"><h5>02 · Equipa técnica</h5><p>Treinadores e responsáveis do escalão.</p>'+staffRows+'</article>'+
+      '<article class="dossier-card"><h5>03 · Calendário e jogos</h5><p>Datas, adversários, locais e resultados.</p>'+fixtureRows+'</article>'+
+      '<article class="dossier-card"><h5>04 · Classificação</h5><p>Tabela e desempenho competitivo.</p>'+standingRows+'</article>';
+  }
+  panel.innerHTML='<h4>'+title+' — '+esc(currentSport)+'</h4><div class="dossier">'+cards+'</div><div class="dossier-note">Os dados apresentados são carregados do ficheiro oficial do clube. Campos vazios significam que a informação ainda não foi fornecida ou validada.</div>';
+  requestAnimationFrame(()=>panel.classList.remove('changing'));
+}
+fetch('./data/club.json').then(r=>{if(!r.ok)throw new Error('Não foi possível carregar os dados');return r.json()}).then(data=>{clubData=data;renderAge()}).catch(()=>{clubData=null;renderAge()});
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{if(currentAge===b.dataset.age)return;currentAge=b.dataset.age;document.querySelectorAll('.tabs button').forEach(t=>{t.classList.toggle('active',t===b);t.setAttribute('aria-selected',String(t===b))});renderAge()}));
 document.getElementById('interest').addEventListener('click',()=>{const n=document.getElementById('nome').value.trim(),m=document.getElementById('modalidade').value;document.getElementById('formmsg').textContent=n&&m?'Pedido preparado. O envio online será disponibilizado após a activação da plataforma de inscrições.':'Preenche o nome do atleta e selecciona uma modalidade.'});
 document.getElementById('year').textContent=new Date().getFullYear();
