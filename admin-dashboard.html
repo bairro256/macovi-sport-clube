@@ -103,8 +103,15 @@ document.getElementById('inviteForm').addEventListener('submit',async e=>{
  button.disabled=true;button.textContent='A gerar convite...';msg.textContent='';result.classList.remove('show');
  const payload={full_name:document.getElementById('supervisorName').value.trim(),email:document.getElementById('supervisorEmail').value.trim(),modality_id:document.getElementById('supervisorModality').value};
  const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:payload});
- if(error||!data?.ok){msg.textContent=data?.error||'Não foi possível gerar o convite. Verifica a sessão e tenta novamente.';}
- else{document.getElementById('inviteCode').textContent=data.code;document.getElementById('inviteInfo').textContent=data.email+' · '+data.modality+' · Expira: '+new Date(data.expires_at).toLocaleString('pt-PT');result.classList.add('show');msg.textContent=data.message;document.getElementById('supervisorName').value='';document.getElementById('supervisorEmail').value='';document.getElementById('supervisorModality').value='';}
+ let functionError=null;
+ if(error?.context && typeof error.context.clone==='function'){
+  try{functionError=await error.context.clone().json();}catch{}
+ }
+ if(error||!data?.ok){
+  const reason=data?.error||functionError?.error||functionError?.message||error?.message||'Erro desconhecido na função de convites.';
+  const code=functionError?.code?(' Código: '+functionError.code+'.'):'';
+  msg.textContent=reason+code;
+ }else{document.getElementById('inviteCode').textContent=data.code;document.getElementById('inviteInfo').textContent=data.email+' · '+data.modality+' · Expira: '+new Date(data.expires_at).toLocaleString('pt-PT');result.classList.add('show');msg.textContent=data.message;document.getElementById('supervisorName').value='';document.getElementById('supervisorEmail').value='';document.getElementById('supervisorModality').value='';}
  button.disabled=false;button.textContent='Gerar convite individual ↗';
 });
 document.getElementById('copyInvite').addEventListener('click',async()=>{const code=document.getElementById('inviteCode').textContent;try{await navigator.clipboard.writeText(code);document.getElementById('copyInvite').textContent='Código copiado';}catch{document.getElementById('copyInvite').textContent='Selecciona e copia o código';}});
