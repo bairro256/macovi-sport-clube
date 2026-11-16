@@ -1,0 +1,20 @@
+{
+  "name": "MACOVI SPORT CLUB",
+  "short_name": "MACOVI",
+  "description": "Desporto, formação e comunidade.",
+  "lang": "pt-AO",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#061a14",
+  "theme_color": "#061c16",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
