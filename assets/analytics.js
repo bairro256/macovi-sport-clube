@@ -27,7 +27,7 @@ function showConsent(){
 }
 const videoState=new WeakMap();
 function videoInfo(video){
- const id=video.dataset.videoId||video.dataset.newsId||video.getAttribute('src')||video.currentSrc||'video-sem-id';
+ const articleId=video.closest('article')?.id?.replace(/^noticia-/,'');\n const id=video.dataset.videoId||video.dataset.newsId||articleId||video.getAttribute('src')||video.currentSrc||'video-sem-id';
  const title=video.dataset.videoTitle||video.getAttribute('aria-label')||video.closest('article,section')?.querySelector('h2,h3,strong')?.textContent?.trim()||'Vídeo da MACOVI';
  return {id:String(id).split('?')[0].slice(-220),title:title.slice(0,150)};
 }
