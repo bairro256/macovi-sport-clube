@@ -19,10 +19,11 @@ const pushPublicKey='BPFhd8mlmI2_xZzw1-1xHHUEBY9Cxg54IAc0Qeaz84UhKGmb09Jqpx-lOTX
 const pushFunction='https://jblxmqoodtfhediqegar.supabase.co/functions/v1/macovi-push';
 const pushApiKey='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
 function pushBytes(value){const pad='='.repeat((4-value.length%4)%4),raw=atob((value+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)));}
-const isIOS=/iphone|ipad|ipod/i.test(ua)&&!window.MSStream;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+const pushStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 async function pushRequest(payload){const response=await fetch(pushFunction,{method:'POST',headers:{'Content-Type':'application/json','apikey':pushApiKey},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok||!data.ok)throw new Error(data.error||'Não foi possível concluir a operação.');return data;}
 async function refreshPushControls(){
- if(isIOS&&!standalone()){pushOpen.hidden=false;pushEnable.disabled=true;pushMessage.textContent='No iPhone ou iPad, adiciona primeiro o Macovi ao ecrã principal e abre a aplicação instalada para activar notificações.';return;}
+ if(isIOS&&!pushStandalone()){pushOpen.hidden=false;pushEnable.disabled=true;pushMessage.textContent='No iPhone ou iPad, adiciona primeiro o Macovi ao ecrã principal e abre a aplicação instalada para activar notificações.';return;}
  if(!('serviceWorker'in navigator)||!('Notification'in window)||!('PushManager'in window)){pushOpen.hidden=true;return;}
  pushOpen.hidden=false;
  try{
@@ -42,7 +43,7 @@ holder.querySelector('#macovi-push-close').addEventListener('click',()=>{pushCar
 pushEnable.addEventListener('click',async()=>{
  pushEnable.disabled=true;pushMessage.textContent='A preparar as notificações…';
  try{
-  if(isIOS&&!standalone())throw new Error('No iPhone/iPad, adiciona primeiro o site ao ecrã principal e abre a aplicação instalada.');
+  if(isIOS&&!pushStandalone())throw new Error('No iPhone/iPad, adiciona primeiro o site ao ecrã principal e abre a aplicação instalada.');
   const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
   if(permission!=='granted')throw new Error(permission==='denied'?'A autorização foi recusada. Podes alterá-la nas definições do navegador.':'A autorização não foi concedida.');
   const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
