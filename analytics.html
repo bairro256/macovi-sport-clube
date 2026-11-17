@@ -19,7 +19,8 @@
 <section class="section"><h2>Eventos registados</h2><div id="events" class="empty">A carregar…</div></section>
 </div><p class="status" id="status">As estatísticas só começam a contar depois de um visitante aceitar a recolha de estatísticas anónimas. Não são recolhidos nomes, e-mails ou localização exacta. As reproduções são contabilizadas quando o vídeo é reproduzido no próprio site; vídeos externos incorporados podem exigir integração específica.</p>
 </main>
-<script>window.addEventListener('error',e=>{const s=document.getElementById('status');if(s){s.textContent='Erro no painel: '+(e.message||'falha de carregamento');s.classList.add('error')}});</script>\n<script type="module">
+<script>window.addEventListener('error',e=>{const s=document.getElementById('status');if(s){s.textContent='Erro no painel: '+(e.message||'falha de carregamento');s.classList.add('error')}});window.addEventListener('unhandledrejection',e=>{const s=document.getElementById('status');if(s){s.textContent='Falha de ligação: '+(e.reason?.message||String(e.reason||'erro inesperado'));s.classList.add('error')}});</script>
+<script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const db=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY');
 const $=id=>document.getElementById(id),fmt=n=>Number(n||0).toLocaleString('pt-AO');
