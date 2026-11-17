@@ -240,8 +240,8 @@ async function loadAudit(){
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function checkSession(){
  const {data:{session}}=await supabase.auth.getSession();if(!session){location.replace('admin.html');return;}
- const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id').eq('user_id',session.user.id).maybeSingle();
- if(error||!profile||profile.role!=='senior_admin'){await supabase.auth.signOut();location.replace('admin.html?access=denied');return;}
+ const {data:profile,error}=await supabase.from('profiles').select('full_name,role,modality_id,active').eq('user_id',session.user.id).maybeSingle();
+ if(error||!profile||profile.role!=='senior_admin'||profile.active!==true){await supabase.auth.signOut();location.replace('admin.html?access=denied');return;}
  currentProfile={...profile,user_id:session.user.id};account.classList.add('show');await loadDashboard(profile);await loadNews();
 }
 document.getElementById('supervisors').addEventListener('click',async e=>{
