@@ -22,11 +22,20 @@ function pushBytes(value){const pad='='.repeat((4-value.length%4)%4),raw=atob((v
 const isIOS=/iphone|ipad|ipod/i.test(ua)&&!window.MSStream;
 async function pushRequest(payload){const response=await fetch(pushFunction,{method:'POST',headers:{'Content-Type':'application/json','apikey':pushApiKey},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok||!data.ok)throw new Error(data.error||'Não foi possível concluir a operação.');return data;}
 async function refreshPushControls(){
+ if(isIOS&&!standalone()){pushOpen.hidden=false;pushEnable.disabled=true;pushMessage.textContent='No iPhone ou iPad, adiciona primeiro o Macovi ao ecrã principal e abre a aplicação instalada para activar notificações.';return;}
  if(!('serviceWorker'in navigator)||!('Notification'in window)||!('PushManager'in window)){pushOpen.hidden=true;return;}
- if(isIOS&&!standalone()){pushEnable.disabled=true;pushMessage.textContent='No iPhone ou iPad, adiciona primeiro o Macovi ao ecrã principal e abre a aplicação instalada para activar notificações.';return;}
- if(Notification.permission==='denied'){pushEnable.disabled=true;pushMessage.textContent='As notificações estão bloqueadas nas definições do navegador. Podes voltar a activá-las nas definições do dispositivo.';return;}
- try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){pushEnable.hidden=true;pushDisable.hidden=false;pushOpen.textContent='🔔 Activas';pushMessage.textContent='Notificações activadas neste dispositivo. Vais receber avisos sempre que houver novas notícias.';}else{pushEnable.hidden=false;pushDisable.hidden=true;pushEnable.disabled=false;pushOpen.textContent='🔔 Notícias';pushMessage.textContent='Activa as notificações para receberes avisos de novas notícias do Macovi.';}}
- catch(error){console.warn('MACOVI_PUSH_STATUS',error);pushMessage.textContent='Não foi possível verificar as notificações neste navegador.';}
+ pushOpen.hidden=false;
+ try{
+  const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
+  if(sub){
+   pushEnable.hidden=true;pushDisable.hidden=false;pushOpen.textContent='🔔 Activas';
+   pushMessage.textContent=Notification.permission==='denied'?'A autorização foi bloqueada nas definições. Podes cancelar esta subscrição aqui.':'Notificações activadas neste dispositivo. Vais receber avisos sempre que houver novas notícias.';
+  }else{
+   pushEnable.hidden=false;pushDisable.hidden=true;pushOpen.textContent='🔔 Notícias';
+   if(Notification.permission==='denied'){pushEnable.disabled=true;pushMessage.textContent='As notificações estão bloqueadas nas definições do navegador. Podes voltar a activá-las nas definições do dispositivo.';}
+   else{pushEnable.disabled=false;pushMessage.textContent='Activa as notificações para receberes avisos de novas notícias do Macovi.';}
+  }
+ }catch(error){console.warn('MACOVI_PUSH_STATUS',error);pushMessage.textContent='Não foi possível verificar as notificações neste navegador.';}
 }
 pushOpen.addEventListener('click',()=>{pushCard.hidden=!pushCard.hidden;if(!pushCard.hidden)refreshPushControls();});
 holder.querySelector('#macovi-push-close').addEventListener('click',()=>{pushCard.hidden=true;});
