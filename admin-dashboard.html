@@ -83,7 +83,7 @@ async function saveNews(e){
  let imagePath=null,videoPath=null,saved=false;const uploadedPaths=[];let previousMedia=null;
  try{
   if(editingNewsId){
-   const {data,error}=await supabase.from('news').select('image_path,video_path').eq('id',editingNewsId).maybeSingle();
+   const {data,error}=await supabase.from('news').select('image_path,video_path,published').eq('id',editingNewsId).maybeSingle();
    if(error||!data)throw new Error(error?.message||'A notícia que estás a editar já não está disponível.');
    previousMedia=data;
   }
@@ -113,6 +113,20 @@ async function saveNews(e){
   }
   if(result.error||!result.data)throw new Error(result.error?.message||'A base de dados não confirmou a publicação.');
   saved=true;
+  let notificationNotice=null;
+  const justPublished=published&&previousMedia?.published!==true;
+  if(justPublished){
+   const {data:pushResult,error:pushError}=await supabase.functions.invoke('macovi-push',{body:{action:'notify-news',news_id:result.data.id}});
+   if(pushError||!pushResult?.ok){
+    console.error('MACOVI_NEWS_PUSH_ERROR',pushError||pushResult);
+    notificationNotice='Notícia publicada, mas não foi possível enviar os avisos. Verifica a configuração das notificações.';
+   }else if(pushResult.total===0){
+    notificationNotice='Notícia publicada. Ainda não há visitantes inscritos para receber notificações.';
+   }else{
+    notificationNotice='Notícia publicada. Avisos enviados a '+pushResult.sent+' dispositivo(s).';
+    if(pushResult.failed)notificationNotice+=' '+pushResult.failed+' envio(s) falharam.';
+   }
+  }
   const obsolete=[];
   if(previousMedia?.image_path&&imagePath&&previousMedia.image_path!==imagePath)obsolete.push(previousMedia.image_path);
   if(previousMedia?.video_path&&videoPath&&previousMedia.video_path!==videoPath)obsolete.push(previousMedia.video_path);
@@ -121,7 +135,7 @@ async function saveNews(e){
    if(cleanupError)showToast('Notícia actualizada, mas alguns ficheiros antigos não puderam ser removidos.','error');
   }
   msg.textContent=published?'Notícia publicada com sucesso.':'Rascunho guardado.';
-  showToast(published?'Notícia publicada com sucesso.':'Rascunho guardado.');
+  showToast(notificationNotice|| (published?'Notícia publicada com sucesso.':'Rascunho guardado.'));
   resetNewsForm();document.getElementById('videoProgress').hidden=true;document.getElementById('videoProgressBar').style.width='0';await loadNews();
  }catch(error){
   console.error('ADMIN_NEWS_SAVE_ERROR',error);
