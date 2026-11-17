@@ -137,8 +137,17 @@ $('recordForm').addEventListener('submit',async e=>{
 });
 $('records').addEventListener('click',async e=>{
  const b=e.target.closest('button[data-action]');if(!b)return;const row=rows.find(x=>x.id===b.dataset.id);if(!row)return;
- if(b.dataset.action==='edit'){editingId=row.id;renderForm();$('formPanel').classList.remove('hidden');$('formPanel').scrollIntoView({behavior:'smooth',block:'start'});}
- if(b.dataset.action==='delete'){if(!confirm('Tens a certeza de que pretendes apagar este registo? Esta acção não pode ser anulada.'))return;const {error}=await supabase.from(configs[section].table).delete().eq('id',row.id).eq('modality_id',modality.id);if(error)showToast('Não foi possível apagar: '+error.message,'error');else{showToast('Registo eliminado.');await loadRows();}}
+ if(b.dataset.action==='edit'){editingId=row.id;renderForm();$('formPanel').classList.remove('hidden');$('formPanel').scrollIntoView({behavior:'smooth',block:'start'});return;}
+ if(b.dataset.action==='delete'){
+  if(!confirm('Tens a certeza de que pretendes apagar este registo? Esta acção não pode ser anulada.'))return;
+  b.disabled=true;
+  try{
+   const {error}=await supabase.from(configs[section].table).delete().eq('id',row.id).eq('modality_id',modality.id);
+   if(error)throw new Error(error.message);
+   showToast('Registo eliminado.');await loadRows();
+  }catch(error){console.error('SUPERVISOR_RECORD_DELETE_ERROR',error);showToast('Não foi possível apagar: '+(error?.message||'erro inesperado'),'error');}
+  finally{if(b.isConnected)b.disabled=false;}
+ }
 });
 $('openForm').addEventListener('click',()=>{editingId=null;renderForm();$('formMessage').textContent='';$('formPanel').classList.remove('hidden');$('formPanel').scrollIntoView({behavior:'smooth',block:'start'});});
 $('cancelEdit').addEventListener('click',()=>{editingId=null;renderForm();$('formPanel').classList.add('hidden');$('formMessage').textContent='';});
