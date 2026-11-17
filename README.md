@@ -1,19 +1,36 @@
 # MACOVI SPORT CLUB — Site Oficial
 
-Website institucional do MACOVI SPORT CLUB, publicado gratuitamente no GitHub Pages.
+**Site oficial da MACOVI SPORT CLUB, clube desportivo angolano.**
 
-## Publicação
+Visita a página oficial: **https://bairro256.github.io/macovi-sport-clube/**
+
+A presença digital da MACOVI apresenta informação institucional e conteúdos das suas oito modalidades:
+
+- Xadrez
+- Andebol Feminino
+- Basquetebol
+- Futsal Feminino
+- Futsal Masculino
+- Judô
+- Karaté-dó
+- Jiu-Jitsu
+
+## Publicação do site
 
 O site é publicado automaticamente a partir da branch `main` pelo workflow `.github/workflows/deploy.yml`.
 
-## Estrutura
+- **Site oficial:** https://bairro256.github.io/macovi-sport-clube/
+- **Sitemap:** https://bairro256.github.io/macovi-sport-clube/sitemap.xml
+- **Robots:** https://bairro256.github.io/macovi-sport-clube/robots.txt
 
-- `index.html` — site público, navegação, modalidades, escalões e dossiers.
+## Estrutura do projecto
+
+- `index.html` — página inicial e navegação pública.
 - `data/club.json` — fonte dos dados desportivos apresentados no site.
-- `assets/macovi.webp` — emblema utilizado pelo site.
+- `assets/` — imagens, estilos e recursos utilizados pelo site.
 - `.github/workflows/deploy.yml` — publicação automática no GitHub Pages.
 
-## Como actualizar os dados sem pagar
+## Como actualizar os dados
 
 1. Abrir o repositório no GitHub.
 2. Entrar em `data/club.json`.
@@ -42,4 +59,4 @@ O site é público. Não colocar números de telefone privados, moradas, documen
 
 Esta solução não cria uma base de dados paga nem um painel administrativo com autenticação. A actualização é feita pelo editor do GitHub, e os dados publicados no site são públicos. Não introduzir credenciais, palavras-passe ou chaves secretas neste repositório.
 
-Os dados desportivos devem ser confirmados pelos responsáveis do MACOVI SPORT CLUB antes da publicação.
+Os dados desportivos devem ser confirmados pelos responsáveis da MACOVI SPORT CLUB antes da publicação.
