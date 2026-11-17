@@ -49,3 +49,24 @@ html[data-theme="light"] [style*="background"]{background:#e8eee9!important;colo
 html[data-theme="light"] .macovi-footer-email{color:#52645a}
 html[data-theme="light"] .macovi-social-icons a{color:#52645a}
 @media(max-width:650px){.macovi-footer-social{justify-content:flex-start;gap:12px;margin-top:12px}.macovi-footer-email{font-size:10px}.macovi-social-icons a{width:24px;height:24px}}
+
+
+/* Cartões culturais: preservar as fotografias também no tema claro */
+html[data-theme="light"] .feature.feature-angola{
+  background:#071a13!important;
+  color:#f4f7f4!important;
+  border-color:rgba(199,164,91,.48)!important;
+  border-top-color:#d7b76d!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.22)!important;
+}
+html[data-theme="light"] .feature.feature-angola:after{
+  opacity:.56;
+  filter:saturate(1.18) contrast(1.08);
+}
+html[data-theme="light"] .feature.feature-angola:hover:after{opacity:.68}
+html[data-theme="light"] .feature.feature-angola .num{color:#e4c77f!important}
+html[data-theme="light"] .feature.feature-angola h3{color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.65)}
+html[data-theme="light"] .feature.feature-angola p{color:#e2e9e3!important;text-shadow:0 1px 8px rgba(0,0,0,.85)}
+html[data-theme="light"] .feature.feature-angola .arrow{color:#f0d38c!important;border-color:rgba(240,211,140,.8)!important}
+html[data-theme="light"] .feature.feature-angola .feature-origin,
+html[data-theme="light"] .feature.feature-angola .feature-credit{color:#f0dcae!important;text-shadow:0 1px 7px rgba(0,0,0,.9)}
