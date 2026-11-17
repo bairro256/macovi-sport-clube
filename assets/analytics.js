@@ -5,7 +5,7 @@ const makeId=()=>{try{return crypto.randomUUID()}catch{return 'xxxxxxxx-xxxx-4xx
 let sessionId;try{sessionId=localStorage.getItem(SESSION_KEY)||makeId();localStorage.setItem(SESSION_KEY,sessionId)}catch{sessionId=makeId()}
 const safePath=()=>{const p=new URL(location.href);const m=p.searchParams.get('m');return p.pathname+(m?'?m='+encodeURIComponent(m):'')};
 const modality=()=>new URLSearchParams(location.search).get('m')||'';
-const referrer=()=>{try{return document.referrer?new URL(document.referrer).hostname:''}catch{return ''}};
+const referrer=()=>{try{const host=document.referrer?new URL(document.referrer).hostname:'';return host&&host!==location.hostname?host:''}catch{return ''}};
 let enabled=false;
 function record(eventType,extra={}) {
  if(!enabled)return;
