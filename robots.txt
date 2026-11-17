@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bairro256.github.io/macovi-sport-clube/sitemap.xml
