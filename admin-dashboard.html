@@ -87,7 +87,7 @@ async function saveNews(e){
    if(error||!data)throw new Error(error?.message||'A notícia que estás a editar já não está disponível.');
    previousMedia=data;
   }
-  const mediaRoot=document.getElementById('newsModality').value||chessModalityId;
+  const mediaRoot=document.getElementById('newsModality').value||'clube';
   if((file||videoFile)&&!mediaRoot)throw new Error('Não foi possível identificar a pasta de multimédia.');
   if(file){
    const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
