@@ -151,7 +151,7 @@
 </div></section></div>
 </div></section></div>
 <div class="view" id="view-competicoes"><section class="page-hero"><div class="shell"><div class="eyebrow">Acompanha o club</div><h1 class="page-title">Centro de<br>competições.</h1><p>Calendários e resultados organizados por modalidade e escalão. Apenas informação confirmada será publicada.</p></div></section><section class="section"><div class="shell competition-grid"><div class="dark-panel"><h3>Próximos jogos</h3><div class="status"><strong>Calendário em actualização</strong>As próximas partidas serão divulgadas após confirmação das datas, locais e adversários.</div></div><div class="dark-panel"><h3>Últimos resultados</h3><div class="status"><strong>Resultados oficiais</strong>Os resultados serão publicados nesta área assim que forem validados pela equipa técnica.</div></div></div></section></div>
-<div class="view" id="view-inscricao"><section class="page-hero"><div class="shell"><div class="eyebrow">Faz parte da família</div><h1 class="page-title">O teu próximo capítulo<br>começa aqui.</h1><p>Manifesta o teu interesse em integrar uma modalidade do Macovi Sport Club.</p></div></section><section class="section"><div class="shell"><div class="form-shell"><div class="form-grid"><div class="field"><label for="nome">Nome do atleta</label><input id="nome" placeholder="Nome completo"></div><div class="field"><label for="nascimento">Data de nascimento</label><input id="nascimento" type="date"></div><div class="field"><label for="responsavel">Contacto do encarregado</label><input id="responsavel" type="tel" placeholder="+244"></div><div class="field"><label for="modalidade">Modalidade pretendida</label><select id="modalidade"><option value="">Seleccionar modalidade</option><option>Xadrez</option><option>Andebol Feminino</option><option>Futsal Feminino</option><option>Futsal Masculino</option><option>Basquetebol</option><option>Judô</option><option>Karaté-dó</option><option>Jiu-Jitsu</option></select></div></div><p class="form-note">Este formulário é uma demonstração visual. O envio e armazenamento de inscrições serão activados quando a ligação segura à base de dados estiver configurada.</p><button class="btn" id="interest">Preparar pedido ↗</button><p id="formmsg" class="form-note" aria-live="polite"></p></div></div></section></div>
+<div class="view" id="view-inscricao"><section class="page-hero"><div class="shell"><div class="eyebrow">Faz parte da família</div><h1 class="page-title">O teu próximo capítulo<br>começa aqui.</h1><p>Manifesta o teu interesse em integrar uma modalidade do Macovi Sport Club.</p></div></section><section class="section"><div class="shell"><div class="form-shell"><form id="registrationForm" novalidate><div class="form-grid"><div class="field"><label for="nome">Nome completo do atleta</label><input id="nome" name="full_name" autocomplete="name" placeholder="Nome completo" required minlength="3" maxlength="120"></div><div class="field"><label for="nascimento">Data de nascimento</label><input id="nascimento" name="birth_date" type="date" required></div><div class="field"><label for="responsavel">Contacto do encarregado</label><input id="responsavel" name="guardian_contact" type="tel" autocomplete="tel" placeholder="+244 9XX XXX XXX" required minlength="6" maxlength="40"></div><div class="field"><label for="modalidade">Modalidade pretendida</label><select id="modalidade" name="modality_id" required><option value="">A carregar modalidades...</option></select></div><div class="field"><label for="filialInscricao">Filial / província (opcional)</label><select id="filialInscricao" name="branch"><option value="">Seleccionar filial</option><option>Luanda</option><option>Uíge</option><option>Huíla</option><option>Namibe</option><option>Portugal</option></select></div></div><div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label for="website">Deixar este campo vazio</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div><p class="form-note">Após o envio, a equipa do Macovi Sport Club irá analisar o pedido e contactar o encarregado através do número indicado. O envio não garante admissão automática.</p><button class="btn" id="interest" type="submit">Enviar inscrição ↗</button><p id="formmsg" class="form-note" aria-live="polite"></p></form></div></div></section></div>
 </main>
 
 <div class="access-backdrop" id="accessBackdrop" aria-hidden="true">
@@ -224,7 +224,7 @@ clubData={modalidades:{}};renderAge();
 document.querySelectorAll('#publicAgeTabs button').forEach(b=>b.addEventListener('click',()=>{if(currentAge===b.dataset.age)return;currentAge=b.dataset.age;document.querySelectorAll('#publicAgeTabs button').forEach(t=>{t.classList.toggle('active',t===b);t.setAttribute('aria-selected',String(t===b))});renderAge()}));
 document.getElementById('technicalToggle').addEventListener('click',()=>{const content=document.getElementById('technicalContent'),open=content.hidden;content.hidden=!open;document.getElementById('technicalToggle').setAttribute('aria-expanded',String(open));document.querySelector('#technicalToggle span').textContent=open?'−':'＋';if(open)renderAge();});
 document.getElementById('seeNews').addEventListener('click',()=>document.getElementById('sportNews').scrollIntoView({behavior:'smooth',block:'center'}));
-document.getElementById('interest').addEventListener('click',()=>{const n=document.getElementById('nome').value.trim(),m=document.getElementById('modalidade').value;document.getElementById('formmsg').textContent=n&&m?'Pedido preparado. O envio online será disponibilizado após a activação da plataforma de inscrições.':'Preenche o nome do atleta e selecciona uma modalidade.'});
+
 document.getElementById('year').textContent=new Date().getFullYear();
 const initial=location.hash.replace('#','');if(['home','club','modalidades','competicoes','inscricao'].includes(initial))showView(initial);
 </script>
@@ -233,6 +233,31 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const sb=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY');
 
 const escNews=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function loadRegistrationModalities(){
+ const select=document.getElementById('modalidade');
+ const {data,error}=await sb.from('modalities').select('id,name').eq('active',true).order('name');
+ if(error||!data?.length){select.innerHTML='<option value="">Modalidades indisponíveis — tenta mais tarde</option>';select.disabled=true;return;}
+ select.innerHTML='<option value="">Seleccionar modalidade</option>'+data.map(m=>'<option value="'+m.id+'">'+escNews(m.name)+'</option>').join('');
+}
+document.getElementById('registrationForm').addEventListener('submit',async event=>{
+ event.preventDefault();
+ const form=event.currentTarget,button=document.getElementById('interest'),message=document.getElementById('formmsg');
+ if(document.getElementById('website').value.trim()){message.textContent='Não foi possível validar o pedido.';return;}
+ if(!form.reportValidity())return;
+ const payload={
+  full_name:document.getElementById('nome').value.trim(),
+  birth_date:document.getElementById('nascimento').value,
+  guardian_contact:document.getElementById('responsavel').value.trim(),
+  modality_id:document.getElementById('modalidade').value,
+  branch:document.getElementById('filialInscricao').value||null
+ };
+ button.disabled=true;button.textContent='A enviar inscrição…';message.textContent='A guardar o pedido com segurança…';
+ const {error}=await sb.from('registrations').insert(payload);
+ button.disabled=false;button.textContent='Enviar inscrição ↗';
+ if(error){console.error('Falha ao enviar inscrição:',error);message.textContent='Não foi possível enviar a inscrição neste momento. Verifica a ligação e tenta novamente.';return;}
+ form.reset();message.textContent='Inscrição enviada com sucesso! A equipa do Macovi Sport Club irá entrar em contacto.';message.style.color='#19c875';
+});
+loadRegistrationModalities();
 async function loadHomepageNews(){
  const target=document.getElementById('homeNewsList');if(!target)return;
  const {data,error}=await sb.from('news').select('id,title,category,summary,image_path,video_path,published_at,created_at,modality_id,modalities(name,slug)').eq('published',true).not('modality_id','is',null).order('published_at',{ascending:false}).order('created_at',{ascending:false}).limit(7);
