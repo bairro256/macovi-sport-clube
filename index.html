@@ -233,20 +233,6 @@ const initial=location.hash.replace('#','');if(['home','club','modalidades','com
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 const sb=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY');
 
- }catch(error){console.error('MACOVI_PUSH_SUBSCRIBE',error);pushStatus.textContent=error?.message||'Não foi possível activar as notificações.';pushEnable.disabled=false;}
-});
-pushDisable?.addEventListener('click',async()=>{
- pushDisable.disabled=true;pushStatus.textContent='A desactivar notificações…';
- try{
-  const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
-  if(sub){const {error}=await sb.functions.invoke('macovi-push',{body:{action:'unsubscribe',endpoint:sub.endpoint}});if(error)throw error;await sub.unsubscribe();}
-  pushStatus.textContent='Notificações desactivadas neste dispositivo.';
- }catch(error){console.error('MACOVI_PUSH_UNSUBSCRIBE',error);pushStatus.textContent='Não foi possível desactivar completamente. Tenta novamente.';}
- finally{pushDisable.disabled=false;await refreshMacoviPush();}
-});
-refreshMacoviPush();
-
-
 const escNews=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function loadRegistrationModalities(){
  const select=document.getElementById('modalidade');
