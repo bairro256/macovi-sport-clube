@@ -33,7 +33,7 @@ const configs={
  standings:{table:'standings',title:'Classificações',singular:'linha de classificação',fields:[
   ['competition','Competição','text',true],['age_group','Escalão','select',true,['juvenis','juniores']],['branch','Filial do Xadrez','select',true,['Luanda','Uíge','Huíla','Namibe','Portugal']],['team_name','Equipa','text',true],['position','Posição','number',false],['played','Jogos disputados','number',true],['wins','Vitórias','number',true],['draws','Empates','number',true],['losses','Derrotas','number',true],['points','Pontos','number',true],['season','Época','text',false],['published','Publicar no site','checkbox',false]]}
 };
-let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[],uploadedPhotoUrl=null;
+let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[];
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':v==='seniores'?'Seniores':'Todos os escalões';}
@@ -107,22 +107,33 @@ function formPayload(){
 }
 $('recordForm').addEventListener('submit',async e=>{
  e.preventDefault();const btn=$('saveButton');btn.disabled=true;$('formMessage').textContent='A guardar...';
- const cfg=configs[section];
- const photoInput=$('f_photo_path');
- if(photoInput?.files?.length){
-  const file=photoInput.files[0];
-  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){$('formMessage').textContent='A imagem deve ser JPG, PNG ou WEBP e não pode ultrapassar 5 MB.';btn.disabled=false;return;}
-  const ext=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':'webp';
-  const path=modality.id+'/'+section+'/'+crypto.randomUUID()+'.'+ext;
-  const {error:uploadError}=await supabase.storage.from('macovi-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
-  if(uploadError){$('formMessage').textContent='Erro ao enviar fotografia: '+uploadError.message;btn.disabled=false;return;}
-  const {data:urlData}=supabase.storage.from('macovi-photos').getPublicUrl(path);uploadedPhotoUrl=urlData.publicUrl;
- }
- const payload=formPayload();if(uploadedPhotoUrl){payload.photo_path=uploadedPhotoUrl;uploadedPhotoUrl=null;}
- let result=editingId?await supabase.from(cfg.table).update(payload).eq('id',editingId).eq('modality_id',modality.id):await supabase.from(cfg.table).insert(payload);
- if(result.error){$('formMessage').textContent='Erro ao guardar: '+result.error.message;}
- else{$('formMessage').textContent='Registo guardado com sucesso.';showToast('Registo guardado com sucesso.');editingId=null;$('formPanel').classList.add('hidden');await loadRows();}
- btn.disabled=false;
+ const cfg=configs[section];let newPhotoPath=null,saved=false;
+ try{
+  const photoInput=$('f_photo_path');
+  if(photoInput?.files?.length){
+   const file=photoInput.files[0];
+   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){$('formMessage').textContent='A imagem deve ser JPG, PNG ou WEBP e não pode ultrapassar 5 MB.';return;}
+   const ext=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':'webp';
+   newPhotoPath=modality.id+'/'+section+'/'+crypto.randomUUID()+'.'+ext;
+   const {error:uploadError}=await supabase.storage.from('macovi-photos').upload(newPhotoPath,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+   if(uploadError)throw new Error('Erro ao enviar fotografia: '+uploadError.message);
+  }
+  const payload=formPayload();
+  if(newPhotoPath){const {data:urlData}=supabase.storage.from('macovi-photos').getPublicUrl(newPhotoPath);payload.photo_path=urlData.publicUrl;}
+  const result=editingId
+   ?await supabase.from(cfg.table).update(payload).eq('id',editingId).eq('modality_id',modality.id)
+   :await supabase.from(cfg.table).insert(payload);
+  if(result.error)throw new Error('Erro ao guardar: '+result.error.message);
+  saved=true;$('formMessage').textContent='Registo guardado com sucesso.';showToast('Registo guardado com sucesso.');
+  editingId=null;$('formPanel').classList.add('hidden');await loadRows();
+ }catch(error){
+  console.error('SUPERVISOR_RECORD_SAVE_ERROR',error);
+  if(newPhotoPath&&!saved){
+   const {error:cleanupError}=await supabase.storage.from('macovi-photos').remove([newPhotoPath]);
+   if(cleanupError)console.error('SUPERVISOR_PHOTO_CLEANUP_ERROR',cleanupError);
+  }
+  $('formMessage').textContent=error?.message||'Ocorreu um erro ao guardar. Tenta novamente.';
+ }finally{btn.disabled=false;}
 });
 $('records').addEventListener('click',async e=>{
  const b=e.target.closest('button[data-action]');if(!b)return;const row=rows.find(x=>x.id===b.dataset.id);if(!row)return;
