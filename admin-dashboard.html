@@ -201,32 +201,38 @@ async function checkSession(){
 document.getElementById('supervisors').addEventListener('click',async e=>{
  const button=e.target.closest('button[data-action]');if(!button)return;
  button.disabled=true;const action=button.dataset.action;
- if(action==='revoke'){
-  const {data,error}=await supabase.rpc('revoke_supervisor_access_codes',{p_modality_id:button.dataset.modality});
-  if(error||!data?.ok)alert(error?.message||data?.error||'Não foi possível revogar os códigos.');
-  else showToast(data.message);
- }else if(action==='toggle'){
-  const nextActive=button.dataset.active!=='true';
-  const {data,error}=await supabase.from('profiles').update({active:nextActive}).eq('user_id',button.dataset.user).select('user_id').maybeSingle();
-  if(error||!data)alert('Não foi possível alterar o estado desta conta.');
-  else showToast(nextActive?'Supervisor reactivado.':'Supervisor suspenso.');
- }else if(action==='replace'){
-  if(confirm('Confirmas a substituição? O supervisor antigo será desvinculado desta modalidade, ficará suspenso e não poderá voltar a entrar. O histórico e os dados da modalidade serão preservados.')){
-   const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'replace',user_id:button.dataset.user,modality_id:button.dataset.modality}});
-   if(error||!data?.ok)alert(data?.error||'Não foi possível substituir o supervisor.');
-   else showToast(data.message);
-  }
- }else if(action==='recover'){
-  if(confirm('Gerar um link de recuperação de palavra-passe para este supervisor? O link é de uso único e deve ser enviado em privado.')){
-   const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'recover',user_id:button.dataset.user,modality_id:button.dataset.modality}});
-   if(error||!data?.ok)alert(data?.error||'Não foi possível gerar o link de recuperação.');
-   else{
+ try{
+  if(action==='revoke'){
+   const {data,error}=await supabase.rpc('revoke_supervisor_access_codes',{p_modality_id:button.dataset.modality});
+   if(error||!data?.ok)throw new Error(error?.message||data?.error||'Não foi possível revogar os códigos.');
+   showToast(data.message);
+  }else if(action==='toggle'){
+   const nextActive=button.dataset.active!=='true';
+   const {data,error}=await supabase.from('profiles').update({active:nextActive}).eq('user_id',button.dataset.user).select('user_id').maybeSingle();
+   if(error||!data)throw new Error(error?.message||'A conta não foi alterada. Actualiza a página e tenta novamente.');
+   showToast(nextActive?'Supervisor reactivado.':'Supervisor suspenso. O acesso aos dados da modalidade foi bloqueado.');
+  }else if(action==='replace'){
+   if(confirm('Confirmas a substituição? O supervisor antigo será desvinculado desta modalidade, ficará suspenso e não poderá voltar a entrar. O histórico e os dados da modalidade serão preservados.')){
+    const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'replace',user_id:button.dataset.user,modality_id:button.dataset.modality}});
+    if(error||!data?.ok)throw new Error(data?.error||error?.message||'Não foi possível substituir o supervisor.');
+    showToast(data.message);
+   }
+  }else if(action==='recover'){
+   if(confirm('Gerar um link de recuperação de palavra-passe para este supervisor? O link é de uso único e deve ser enviado em privado.')){
+    const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'recover',user_id:button.dataset.user,modality_id:button.dataset.modality}});
+    if(error||!data?.ok)throw new Error(data?.error||error?.message||'Não foi possível gerar o link de recuperação.');
     try{await navigator.clipboard.writeText(data.action_link);showToast('Link de recuperação copiado. Envia-o em privado para '+data.email+'.');}
     catch{prompt('Copia este link e envia-o em privado a '+data.email,data.action_link);}
    }
   }
+ }catch(error){
+  console.error('ADMIN_SUPERVISOR_ACTION_ERROR',error);
+  alert(error?.message||'Ocorreu um erro ao executar esta acção. Tenta novamente.');
+ }finally{
+  if(button.isConnected)button.disabled=false;
+  try{await loadDashboard(currentProfile);}
+  catch(error){console.error('ADMIN_DASHBOARD_REFRESH_ERROR',error);showToast('Acção concluída, mas não foi possível actualizar o painel. Recarrega a página.');}
  }
- await loadDashboard(currentProfile);
 });
 document.getElementById('inviteForm').addEventListener('submit',async e=>{
  e.preventDefault();
