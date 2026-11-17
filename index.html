@@ -252,10 +252,10 @@ function pushBase64ToBytes(value){const pad='='.repeat((4-value.length%4)%4),raw
 function pushStandalone(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 async function refreshMacoviPush(){
  if(!pushCard)return;
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+ if(ios&&!pushStandalone()){pushCard.hidden=false;pushEnable.disabled=true;pushStatus.textContent='No iPhone ou iPad, primeiro adiciona o Macovi ao ecrã principal e abre a aplicação instalada para activar notificações.';return;}
  if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window)){pushCard.hidden=true;return;}
  pushCard.hidden=false;
- const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
- if(ios&&!pushStandalone()){pushEnable.disabled=true;pushStatus.textContent='No iPhone ou iPad, primeiro adiciona o Macovi ao ecrã principal e abre a aplicação instalada para activar notificações.';return;}
  if(Notification.permission==='denied'){pushEnable.disabled=true;pushStatus.textContent='As notificações estão bloqueadas nas definições do navegador. Podes voltar a activá-las nas definições do dispositivo.';return;}
  try{
   const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
