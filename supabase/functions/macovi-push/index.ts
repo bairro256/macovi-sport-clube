@@ -13,6 +13,21 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...corsHeaders, "Content-Type": "application/json" },
 });
+function isTrustedPushEndpoint(value: string) {
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    const trusted = host === "fcm.googleapis.com"
+      || host === "updates.push.services.mozilla.com"
+      || host === "push.services.mozilla.com"
+      || host === "push.apple.com"
+      || host.endsWith(".push.apple.com")
+      || host.endsWith(".notify.windows.com");
+    return parsed.protocol === "https:" && (!parsed.port || parsed.port === "443") && trusted;
+  } catch {
+    return false;
+  }
+}
 function getKeys() {
   const publishable = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
   const secret = Deno.env.get("SUPABASE_SECRET_KEYS");
@@ -35,9 +50,7 @@ Deno.serve(async (req: Request) => {
       const endpoint = String(sub?.endpoint || "");
       const p256dh = String(sub?.keys?.p256dh || "");
       const auth = String(sub?.keys?.auth || "");
-      let parsed: URL;
-      try { parsed = new URL(endpoint); } catch { return json({ error: "Invalid push endpoint." }, 400); }
-      if (parsed.protocol !== "https:" || endpoint.length > 2048 || p256dh.length < 20 || auth.length < 10) {
+      if (!isTrustedPushEndpoint(endpoint) || endpoint.length > 2048 || p256dh.length < 20 || auth.length < 10) {
         return json({ error: "Invalid push subscription." }, 400);
       }
       const now = new Date().toISOString();
@@ -49,7 +62,7 @@ Deno.serve(async (req: Request) => {
     }
     if (body?.action === "unsubscribe") {
       const endpoint = String(body?.endpoint || "");
-      if (!endpoint.startsWith("https://") || endpoint.length > 2048) return json({ error: "Invalid endpoint." }, 400);
+      if (!isTrustedPushEndpoint(endpoint) || endpoint.length > 2048) return json({ error: "Invalid endpoint." }, 400);
       const { error } = await admin.from("macovi_push_subscriptions").delete().eq("endpoint", endpoint);
       if (error) throw error;
       return json({ ok: true });
