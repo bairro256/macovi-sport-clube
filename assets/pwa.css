@@ -70,3 +70,31 @@ html[data-theme="light"] .feature.feature-angola p{color:#e2e9e3!important;text-
 html[data-theme="light"] .feature.feature-angola .arrow{color:#f0d38c!important;border-color:rgba(240,211,140,.8)!important}
 html[data-theme="light"] .feature.feature-angola .feature-origin,
 html[data-theme="light"] .feature.feature-angola .feature-credit{color:#f0dcae!important;text-shadow:0 1px 7px rgba(0,0,0,.9)}
+
+
+/* CORRECAO DEFINITIVA — preservar as tres fotografias angolanas no modo claro */
+html[data-theme="light"] .feature.feature-angola{
+  background:#071a13!important;
+  color:#f6f5ef!important;
+  border-color:rgba(199,164,91,.62)!important;
+}
+html[data-theme="light"] .feature.feature-angola:after{
+  z-index:0!important;
+  opacity:.88!important;
+  background-size:cover!important;
+  background-position:center!important;
+}
+html[data-theme="light"] .feature.feature-angola.feature-kalandula:after{
+  background-image:linear-gradient(90deg,rgba(4,19,13,.72) 0%,rgba(4,19,13,.36) 48%,rgba(4,19,13,.08) 100%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Kalandula%20Falls%20C.jpg")!important;
+}
+html[data-theme="light"] .feature.feature-angola.feature-leba:after{
+  background-image:linear-gradient(90deg,rgba(4,19,13,.72) 0%,rgba(4,19,13,.36) 48%,rgba(4,19,13,.08) 100%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Serra%20da%20Leba%20Road%2C%20Angola.jpg")!important;
+}
+html[data-theme="light"] .feature.feature-angola.feature-moco:after{
+  background-image:linear-gradient(90deg,rgba(4,19,13,.72) 0%,rgba(4,19,13,.36) 48%,rgba(4,19,13,.08) 100%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Morro%20do%20Moco%2C%20Huambo%2C%20Angola.jpg")!important;
+}
+html[data-theme="light"] .feature.feature-angola>*{
+  position:relative!important;
+  z-index:1!important;
+}
+html[data-theme="light"] .feature.feature-angola .feature-credit{z-index:2!important}
