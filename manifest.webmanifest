@@ -11,10 +11,10 @@
   "theme_color": "#061c16",
   "icons": [
     {
-      "src": "assets/app-icon.svg",
+      "src": "assets/macovi.webp?v=2",
       "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/webp",
+      "purpose": "any"
     }
   ]
 }
