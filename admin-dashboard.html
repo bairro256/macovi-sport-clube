@@ -73,30 +73,64 @@ async function uploadNewsVideo(file,path){
 
 async function saveNews(e){
  e.preventDefault();
- const msg=document.getElementById('newsMessage'),btn=document.getElementById('newsSave'),file=document.getElementById('newsImage').files[0],videoFile=document.getElementById('newsVideo').files[0];
+ const msg=document.getElementById('newsMessage'),btn=document.getElementById('newsSave');
+ const file=document.getElementById('newsImage').files[0],videoFile=document.getElementById('newsVideo').files[0];
  const title=document.getElementById('newsTitle').value.trim(),body=document.getElementById('newsBody').value.trim(),published=document.getElementById('newsPublished').checked;
  if(file&&(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024)){msg.textContent='A fotografia deve ser JPG, PNG ou WEBP e não pode ultrapassar 5 MB.';return;}
  if(videoFile&&(!['video/mp4','video/webm','video/quicktime'].includes(videoFile.type)||videoFile.size>40*1024*1024)){msg.textContent='O vídeo deve ser MP4, WEBM ou MOV e não pode ultrapassar 40 MB.';return;}
-  if(videoFile&&!file){msg.textContent='Para publicar um vídeo sem ecrã preto, selecciona também uma fotografia de capa no campo Fotografia.';document.getElementById('newsImage').focus();return;}
+ if(videoFile&&!file){msg.textContent='Para publicar um vídeo sem ecrã preto, selecciona também uma fotografia de capa no campo Fotografia.';document.getElementById('newsImage').focus();return;}
  btn.disabled=true;msg.textContent='A guardar publicação...';
- let imagePath=null,videoPath=null;
- const mediaRoot=document.getElementById('newsModality').value||chessModalityId;
- if((file||videoFile)&&!mediaRoot){msg.textContent='Não foi possível identificar a pasta de multimédia.';btn.disabled=false;return;}
- if(file){
-  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
-  imagePath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;
-  const {error:uploadError}=await supabase.storage.from('macovi-photos').upload(imagePath,file,{contentType:file.type,upsert:false});
-  if(uploadError){msg.textContent='Falha ao carregar fotografia: '+uploadError.message;btn.disabled=false;return;}
- }
- if(videoFile){const ext=videoFile.type==='video/mp4'?'mp4':videoFile.type==='video/webm'?'webm':'mov';videoPath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;try{msg.textContent='A carregar vídeo e fotografia de capa...';await uploadNewsVideo(videoFile,videoPath);}catch(uploadError){msg.textContent='Falha ao carregar vídeo: '+uploadError.message;btn.disabled=false;return;}}
- const payload={title,category:document.getElementById('newsCategory').value,summary:document.getElementById('newsSummary').value.trim()||null,body,modality_id:document.getElementById('newsModality').value||null,published,published_at:published?new Date().toISOString():null,updated_by:currentProfile.user_id||null};
- if(imagePath)payload.image_path=imagePath;if(videoPath)payload.video_path=videoPath;
- let result;
- if(editingNewsId)result=await supabase.from('news').update(payload).eq('id',editingNewsId).select('id').maybeSingle();
- else result=await supabase.from('news').insert({...payload,created_by:(await supabase.auth.getUser()).data.user.id}).select('id').single();
- if(result.error||!result.data){msg.textContent='Não foi possível guardar: '+(result.error?.message||'sem confirmação da base de dados');btn.disabled=false;return;}
- msg.textContent=published?'Notícia publicada com sucesso.':'Rascunho guardado.';showToast(published?'Notícia publicada com sucesso.':'Rascunho guardado.');
- resetNewsForm();document.getElementById('videoProgress').hidden=true;document.getElementById('videoProgressBar').style.width='0';btn.disabled=false;await loadNews();
+ let imagePath=null,videoPath=null,saved=false;const uploadedPaths=[];let previousMedia=null;
+ try{
+  if(editingNewsId){
+   const {data,error}=await supabase.from('news').select('image_path,video_path').eq('id',editingNewsId).maybeSingle();
+   if(error||!data)throw new Error(error?.message||'A notícia que estás a editar já não está disponível.');
+   previousMedia=data;
+  }
+  const mediaRoot=document.getElementById('newsModality').value||chessModalityId;
+  if((file||videoFile)&&!mediaRoot)throw new Error('Não foi possível identificar a pasta de multimédia.');
+  if(file){
+   const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+   imagePath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;
+   const {error}=await supabase.storage.from('macovi-photos').upload(imagePath,file,{contentType:file.type,cacheControl:'3600',upsert:false});
+   if(error)throw new Error('Falha ao carregar fotografia: '+error.message);
+   uploadedPaths.push(imagePath);
+  }
+  if(videoFile){
+   const ext=videoFile.type==='video/mp4'?'mp4':videoFile.type==='video/webm'?'webm':'mov';
+   videoPath=mediaRoot+'/news/'+crypto.randomUUID()+'.'+ext;
+   msg.textContent='A carregar vídeo...';
+   await uploadNewsVideo(videoFile,videoPath);uploadedPaths.push(videoPath);
+  }
+  const payload={title,category:document.getElementById('newsCategory').value,summary:document.getElementById('newsSummary').value.trim()||null,body,modality_id:document.getElementById('newsModality').value||null,published,published_at:published?new Date().toISOString():null,updated_by:currentProfile.user_id||null};
+  if(imagePath)payload.image_path=imagePath;if(videoPath)payload.video_path=videoPath;
+  let result;
+  if(editingNewsId)result=await supabase.from('news').update(payload).eq('id',editingNewsId).select('id').maybeSingle();
+  else{
+   const {data:authData,error:authError}=await supabase.auth.getUser();
+   if(authError||!authData?.user)throw new Error('A sessão do administrador expirou. Entra novamente.');
+   result=await supabase.from('news').insert({...payload,created_by:authData.user.id}).select('id').single();
+  }
+  if(result.error||!result.data)throw new Error(result.error?.message||'A base de dados não confirmou a publicação.');
+  saved=true;
+  const obsolete=[];
+  if(previousMedia?.image_path&&imagePath&&previousMedia.image_path!==imagePath)obsolete.push(previousMedia.image_path);
+  if(previousMedia?.video_path&&videoPath&&previousMedia.video_path!==videoPath)obsolete.push(previousMedia.video_path);
+  if(obsolete.length){
+   const {error:cleanupError}=await supabase.storage.from('macovi-photos').remove(obsolete);
+   if(cleanupError)showToast('Notícia actualizada, mas alguns ficheiros antigos não puderam ser removidos.','error');
+  }
+  msg.textContent=published?'Notícia publicada com sucesso.':'Rascunho guardado.';
+  showToast(published?'Notícia publicada com sucesso.':'Rascunho guardado.');
+  resetNewsForm();document.getElementById('videoProgress').hidden=true;document.getElementById('videoProgressBar').style.width='0';await loadNews();
+ }catch(error){
+  console.error('ADMIN_NEWS_SAVE_ERROR',error);
+  if(!saved&&uploadedPaths.length){
+   const {error:cleanupError}=await supabase.storage.from('macovi-photos').remove(uploadedPaths);
+   if(cleanupError)console.error('ADMIN_NEWS_UPLOAD_CLEANUP_ERROR',cleanupError);
+  }
+  msg.textContent=error?.message||'Ocorreu um erro ao guardar a notícia. Tenta novamente.';
+ }finally{btn.disabled=false;}
 }
 newsForm.addEventListener('submit',saveNews);
 document.getElementById('newsCancel').addEventListener('click',()=>{resetNewsForm();document.getElementById('newsMessage').textContent='Edição cancelada.';});
