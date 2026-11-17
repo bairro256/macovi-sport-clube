@@ -170,7 +170,7 @@ document.getElementById('supervisors').addEventListener('click',async e=>{
   if(confirm('Confirmas a substituição? O supervisor antigo será desvinculado desta modalidade, ficará suspenso e não poderá voltar a entrar. O histórico e os dados da modalidade serão preservados.')){
    const {data,error}=await supabase.functions.invoke('supervisor-invite',{body:{action:'replace',user_id:button.dataset.user,modality_id:button.dataset.modality}});
    if(error||!data?.ok)alert(data?.error||'Não foi possível substituir o supervisor.');
-   else alert(data.message);
+   else showToast(data.message);
   }
  }else if(action==='recover'){
   if(confirm('Gerar um link de recuperação de palavra-passe para este supervisor? O link é de uso único e deve ser enviado em privado.')){
