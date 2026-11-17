@@ -255,7 +255,7 @@ document.getElementById('registrationForm').addEventListener('submit',async even
  const {error}=await sb.from('registrations').insert(payload);
  button.disabled=false;button.textContent='Enviar inscrição ↗';
  if(error){console.error('Falha ao enviar inscrição:',error);message.textContent='Não foi possível enviar a inscrição neste momento. Verifica a ligação e tenta novamente.';return;}
- form.reset();message.textContent='Inscrição enviada com sucesso! A equipa do Macovi Sport Club irá entrar em contacto.';message.style.color='#19c875';
+ form.reset();message.textContent='Inscrição enviada com sucesso! A equipa da Macovi Sport Club irá entrar em contacto.';message.style.color='#19c875';
 });
 loadRegistrationModalities();
 async function loadHomepageNews(){
