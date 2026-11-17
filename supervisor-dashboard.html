@@ -36,7 +36,7 @@ const configs={
 let user=null,profile=null,modality=null,section='athletes',editingId=null,rows=[];
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':v==='seniores'?'Seniores':'Todos os escalões';}
+function labelAge(v){return v==='juvenis'?'Juvenis · Sub-17':v==='juniores'?'Juniores · Sub-20':v==='seniores'?'Seniores · não aprovado':'Todos os escalões';}
 function visibleFields(){
  const fields=configs[section].fields;
  if(!modality)return fields;
