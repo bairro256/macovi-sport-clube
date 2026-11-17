@@ -83,12 +83,12 @@ function renderForm(){
  const row=editingId?rows.find(x=>x.id===editingId):null;
  $('fields').innerHTML=visibleFields().map(f=>{
  const [key,name,type,required,opts]=f,v=row?.[key]??(key==='branch'&&modality.slug==='xadrez'&&$('branchFilter').value!=='todas'?$('branchFilter').value:null);
-  const choices=opts||[];
+  const choices=opts||[],formChoices=key==='age_group'&&v==='seniores'&&!choices.includes('seniores')?['seniores',...choices]:choices;
  if(type==='checkbox'){const checked=v===undefined?(key==='active'&&(section==='athletes'||section==='coaches')):v===true;return '<div class="field check wide"><input id="f_'+key+'" type="checkbox" '+(checked?'checked':'')+'><label for="f_'+key+'">'+esc(name)+'</label></div>';}
  let input='';
  if(type==='file')input='<input id="f_'+key+'" type="file" accept="image/jpeg,image/png,image/webp">'+(v?'<div class="muted">Fotografia actual: <a href="'+esc(v)+'" target="_blank" rel="noopener">ver imagem</a></div>':'');
  else if(type==='textarea')input='<textarea id="f_'+key+'" '+(required?'required':'')+'>'+esc(v||'')+'</textarea>';
- else if(type==='select')input='<select id="f_'+key+'" '+(required?'required':'')+'><option value="">Seleccionar</option>'+choices.map(o=>'<option value="'+esc(o)+'" '+(v===o?'selected':'')+'>'+esc(o==='juvenis'?'Juvenis · Sub-17':o==='juniores'?'Juniores · Sub-20':o==='seniores'?'Seniores':o==='masculino'?'Masculino':o==='feminino'?'Feminino':o==='outro'?'Outro':o)+'</option>').join('')+'</select>';
+ else if(type==='select')input='<select id="f_'+key+'" '+(required?'required':'')+'><option value="">Seleccionar</option>'+formChoices.map(o=>'<option value="'+esc(o)+'" '+(v===o?'selected':'')+'>'+esc(o==='juvenis'?'Juvenis · Sub-17':o==='juniores'?'Juniores · Sub-20':o==='seniores'?'Seniores · registo existente (não aprovado)':o==='masculino'?'Masculino':o==='feminino'?'Feminino':o==='outro'?'Outro':o)+'</option>').join('')+'</select>';
  else {let value=v??'';if(type==='datetime-local'&&value){const d=new Date(value);value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
  input='<input id="f_'+key+'" type="'+type+'" value="'+esc(value)+'" '+(required?'required':'')+'>';}
  return '<div class="field '+(type==='textarea'?'wide':'')+'"><label for="f_'+key+'">'+esc(name)+'</label>'+input+'</div>';
