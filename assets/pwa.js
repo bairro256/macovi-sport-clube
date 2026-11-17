@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const root=document.documentElement,KEY='macovi-theme',dismiss='macovi-install-dismissed';
 const saved=localStorage.getItem(KEY);if(saved==='light'||saved==='dark')root.dataset.theme=saved;
-const holder=document.createElement('div');holder.id='macovi-pwa-tools';holder.innerHTML='<button id="macovi-theme-toggle" type="button" aria-label="Alternar tema" title="Alternar modo claro/escuro">☀</button><button id="macovi-push-open" type="button" aria-label="Notificações de notícias">🔔 Notícias</button><section id="macovi-push-card" hidden aria-live="polite"><strong>Notícias do MACOVI</strong><p id="macovi-push-message">Recebe um aviso sempre que uma nova notícia for publicada.</p><div id="macovi-push-actions"><button id="macovi-push-enable" type="button">Activar notificações</button><button id="macovi-push-disable" class="secondary" type="button" hidden>Desactivar</button><button id="macovi-push-close" class="secondary" type="button">Fechar</button></div></section><section id="macovi-install-card" hidden aria-live="polite"><strong>Instala o MACOVI no teu telefone</strong><p id="macovi-install-message">Adiciona o site ao ecrã inicial para abrir mais rapidamente, como uma aplicação.</p><div id="macovi-install-actions"><button id="macovi-install-action" type="button">Instalar</button><button id="macovi-install-close" class="secondary" type="button">Agora não</button></div></section>';
+const holder=document.createElement('div');holder.id='macovi-pwa-tools';holder.innerHTML='<button id="macovi-theme-toggle" type="button" aria-label="Alternar tema" title="Alternar modo claro/escuro">☀</button><button id="macovi-push-open" type="button" aria-label="Receber notificações de notícias">🔔 Receber notícias</button><section id="macovi-push-card" hidden aria-live="polite"><strong>Não percas nenhuma novidade da MACOVI!</strong><p id="macovi-push-message">Queres acompanhar o clube de perto? Activa as notificações e recebe um aviso no teu dispositivo sempre que publicarmos notícias e informações importantes.</p><div id="macovi-push-actions"><button id="macovi-push-enable" type="button">Activar notificações</button><button id="macovi-push-disable" class="secondary" type="button" hidden>Desactivar</button><button id="macovi-push-close" class="secondary" type="button">Fechar</button></div></section><section id="macovi-install-card" hidden aria-live="polite"><strong>Instala o MACOVI no teu telefone</strong><p id="macovi-install-message">Adiciona o site ao ecrã inicial para abrir mais rapidamente, como uma aplicação.</p><div id="macovi-install-actions"><button id="macovi-install-action" type="button">Instalar</button><button id="macovi-install-close" class="secondary" type="button">Agora não</button></div></section>';
 document.body.appendChild(holder);
 
 // Contactos e redes sociais no rodapé de todas as páginas públicas.
@@ -29,12 +29,12 @@ async function refreshPushControls(){
  try{
   const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
   if(sub){
-   pushEnable.hidden=true;pushDisable.hidden=false;pushOpen.textContent='🔔 Activas';
+   pushEnable.hidden=true;pushDisable.hidden=false;pushOpen.textContent='✓ Notificações activas';
    pushMessage.textContent=Notification.permission==='denied'?'A autorização foi bloqueada nas definições. Podes cancelar esta subscrição aqui.':'Notificações activadas neste dispositivo. Vais receber avisos sempre que houver novas notícias.';
   }else{
-   pushEnable.hidden=false;pushDisable.hidden=true;pushOpen.textContent='🔔 Notícias';
+   pushEnable.hidden=false;pushDisable.hidden=true;pushOpen.textContent='🔔 Receber notícias';
    if(Notification.permission==='denied'){pushEnable.disabled=true;pushMessage.textContent='As notificações estão bloqueadas nas definições do navegador. Podes voltar a activá-las nas definições do dispositivo.';}
-   else{pushEnable.disabled=false;pushMessage.textContent='Activa as notificações para receberes avisos de novas notícias do Macovi.';}
+   else{pushEnable.disabled=false;pushMessage.textContent='Queres acompanhar o clube de perto? Activa as notificações e recebe um aviso no teu dispositivo sempre que publicarmos notícias e informações importantes.';}
   }
  }catch(error){console.warn('MACOVI_PUSH_STATUS',error);pushMessage.textContent='Não foi possível verificar as notificações neste navegador.';}
 }
