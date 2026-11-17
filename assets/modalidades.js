@@ -8,7 +8,20 @@ const title=names[slug]||'Modalidade Macovi',base='modalidade',links=[['Início'
 const url=p=>p+'?m='+encodeURIComponent(slug),date=v=>v?new Date(v).toLocaleDateString('pt-AO'):'Data por confirmar',img=p=>p?db.storage.from('macovi-photos').getPublicUrl(p).data.publicUrl:null,empty=t=>'<div class="empty">'+t+'</div>';
 if(!names[slug]){$('#content')?.replaceChildren(Object.assign(document.createElement('p'),{textContent:'Modalidade não identificada. Volta à página principal do clube.'}));}
 else{
- document.title=title+' | MACOVI SPORT CLUB';$('#modName').textContent=title;$('#modName2').textContent=title;$('#heroModName')&&($('#heroModName').textContent=title);$('#intro').textContent=intros[slug];
+ const pageLabels={home:'',noticias:'Notícias',escola:'Escola e treinos',salas:'Salas de treino',atletas:'Atletas',conquistas:'Conquistas',historia:'História'};
+ const pageLabel=pageLabels[page]??'Modalidade',pageTitle=page==='home'?title+' | MACOVI SPORT CLUB':pageLabel+' de '+title+' | MACOVI SPORT CLUB';
+ const pageDescription=page==='home'?intros[slug]+' Conhece a modalidade, acompanha as notícias e descobre como fazer parte do MACOVI SPORT CLUB.':pageLabel+' de '+title+' no MACOVI SPORT CLUB. '+(intros[slug]||'Conhece a modalidade e acompanha a sua actividade.')+' Consulta informação publicada e confirmada pelo clube.';
+ document.title=pageTitle;
+ const setMeta=(key,value,attr='name')=>{let node=document.head.querySelector('meta['+attr+'="'+key+'"]');if(!node){node=document.createElement('meta');node.setAttribute(attr,key);document.head.append(node)}node.content=value};
+ setMeta('description',pageDescription);setMeta('robots','index,follow,max-image-preview:large');
+ setMeta('og:type','website','property');setMeta('og:site_name','MACOVI SPORT CLUB','property');setMeta('og:title',pageTitle,'property');setMeta('og:description',pageDescription,'property');setMeta('og:image','https://bairro256.github.io/macovi-sport-clube/assets/macovi.webp','property');
+ setMeta('twitter:card','summary');setMeta('twitter:title',pageTitle);setMeta('twitter:description',pageDescription);
+ const canonical=new URL(location.href);canonical.hash='';canonical.search='';canonical.searchParams.set('m',slug);
+ let canonicalNode=document.head.querySelector('link[rel="canonical"]');if(!canonicalNode){canonicalNode=document.createElement('link');canonicalNode.rel='canonical';document.head.append(canonicalNode)}canonicalNode.href=canonical.href;
+ setMeta('og:url',canonical.href,'property');
+ let seoSchema=document.getElementById('page-seo-schema');if(!seoSchema){seoSchema=document.createElement('script');seoSchema.id='page-seo-schema';seoSchema.type='application/ld+json';document.head.append(seoSchema)}
+ seoSchema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":pageTitle,"description":pageDescription,"url":canonical.href,"inLanguage":"pt-AO","isPartOf":{"@type":"WebSite","name":"MACOVI SPORT CLUB","url":"https://bairro256.github.io/macovi-sport-clube/"}});
+ $('#modName').textContent=title;$('#modName2').textContent=title;$('#heroModName')&&($('#heroModName').textContent=title);$('#intro').textContent=intros[slug];
  $('#mainLinks').innerHTML='<a class="back-modalities" href="index.html#modalidades">← Todas as modalidades</a>'+links.map(([label,path,key])=>'<a href="'+url(path)+'" '+(page===key?'class="active"':'')+'>'+label+'</a>').join('');
  $('#menuButton').addEventListener('click',()=>$('#mainLinks').classList.toggle('open'));
  $('#brandHome').href=url('modalidade.html');document.querySelectorAll('a[href^="modalidade"]').forEach(a=>{const target=a.getAttribute('href').split('?')[0];a.href=url(target)});
