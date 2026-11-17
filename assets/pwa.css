@@ -203,3 +203,15 @@ html[data-theme="light"] .tile p,
 html[data-theme="light"] .news-card p,
 html[data-theme="light"] .info-card p{color:#52645a!important}
 html[data-theme="light"] .empty{background:#f8faf8!important;color:#52645a!important;border-color:#cbd8ce!important}
+
+/* MACOVI — controlo global de notificações */
+#macovi-push-open{border:1px solid rgba(25,200,117,.55);background:#0b2118;color:#f4f7f4;border-radius:999px;padding:11px 15px;font-size:12px;font-weight:800;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+#macovi-push-card{width:min(340px,calc(100vw - 32px));padding:18px;background:var(--install-bg);color:var(--install-text);border:1px solid rgba(25,200,117,.45);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+#macovi-push-card[hidden]{display:none}
+#macovi-push-card strong{display:block;font-size:14px;margin-bottom:6px}
+#macovi-push-card p{font-size:12px;line-height:1.55;color:#b7c8bf;margin:0 0 12px}
+#macovi-push-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#macovi-push-actions button{border:0;border-radius:7px;padding:10px 12px;background:#00a85a;color:#04150d;font-weight:900;font-size:11px}
+#macovi-push-actions button.secondary{background:transparent;border:1px solid rgba(220,245,230,.2);color:inherit}
+#macovi-push-actions button:disabled{opacity:.5;cursor:not-allowed}
+html[data-theme="light"] #macovi-push-open{background:#fff;color:#17251e}
