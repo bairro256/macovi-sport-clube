@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-AO"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061a14"><title>Estatísticas do site | MACOVI SPORT CLUB"><style>
+:root{--bg:#061a14;--panel:#0c251b;--green:#00a85a;--bright:#19c875;--line:rgba(220,245,230,.14);--muted:#a6b8ae;--white:#f4f7f4}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 0,rgba(0,168,90,.14),transparent 35%),var(--bg);color:var(--white);font-family:Inter,Arial,sans-serif}.shell{width:min(1180px,100%);margin:auto;padding:22px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:25px}.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}.brand img{width:48px;height:48px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}.brand strong{font-size:14px;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.18em;margin-top:4px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn,button,select{padding:11px 14px;border:1px solid var(--green);border-radius:7px;background:var(--green);color:#03140d;font-weight:900;font-size:11px;cursor:pointer;text-decoration:none}.btn.ghost,select{background:#071b13;color:var(--white);border-color:var(--line)}h1{font-size:clamp(27px,5vw,42px);letter-spacing:-.05em;text-transform:uppercase;margin:8px 0}.muted{color:var(--muted);font-size:13px;line-height:1.6}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:20px 0}.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.card{background:linear-gradient(145deg,#102d22,#081e15);border:1px solid var(--line);border-top:2px solid var(--green);padding:18px;border-radius:10px;min-width:0}.card span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}.card strong{display:block;font-size:clamp(22px,3vw,31px);margin-top:9px;overflow-wrap:anywhere}.section{margin-top:26px;background:#0a2118;border:1px solid var(--line);border-radius:10px;padding:18px}.section h2{font-size:16px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}td,th{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}.bar-row{display:grid;grid-template-columns:90px 1fr 42px;align-items:center;gap:10px;margin:10px 0;font-size:11px}.bar{height:10px;background:#061810;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#00a85a,#c7a45b);border-radius:99px}.empty{color:var(--muted);font-size:12px;padding:12px 0}.status{padding:12px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:12px;margin-top:15px}.error{color:#ffb6b6}@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}}@media(max-width:500px){.shell{padding:14px}.grid{grid-template-columns:1fr 1fr}.card{padding:14px}.bar-row{grid-template-columns:75px 1fr 34px}}
+</style></head><body><main class="shell">
+<header class="top"><a class="brand" href="admin-dashboard.html"><img src="assets/macovi.webp" alt="Emblema da MACOVI"><span><strong>MACOVI SPORT CLUB</strong><small>PAINEL DE ESTATÍSTICAS</small></span></a><div class="actions"><a class="btn ghost" href="admin-dashboard.html">← Administração</a><button id="refresh">Actualizar dados</button><button id="logout">Terminar sessão</button></div></header>
+<div><div class="muted">VISÃO GERAL DO DESEMPENHO DIGITAL</div><h1>Estatísticas do site</h1><p class="muted">Acompanha visitas, páginas, vídeos e interacções registadas depois da activação das estatísticas.</p></div>
+<div class="toolbar"><label for="period">Período:</label><select id="period"><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select><span class="muted" id="updated">A verificar sessão…</span></div>
+<section class="grid">
+<div class="card"><span>Visualizações de páginas</span><strong id="views">—</strong></div><div class="card"><span>Sessões únicas</span><strong id="visitors">—</strong></div><div class="card"><span>Reproduções iniciadas</span><strong id="videoStarts">—</strong></div><div class="card"><span>Vídeos concluídos</span><strong id="videoCompletions">—</strong></div><div class="card"><span>Interacções</span><strong id="interactions">—</strong></div>
+</section>
+<section class="section"><h2>Evolução diária</h2><div id="daily" class="empty">A carregar…</div></section>
+<div class="two">
+<section class="section"><h2>Páginas mais visitadas</h2><div class="table-wrap"><table><thead><tr><th>Página</th><th>Visitas</th><th>Sessões</th></tr></thead><tbody id="pages"><tr><td colspan="3">A carregar…</td></tr></tbody></table></div></section>
+<section class="section"><h2>Vídeos mais vistos</h2><div class="table-wrap"><table><thead><tr><th>Vídeo</th><th>Reproduções</th><th>Concluídos</th></tr></thead><tbody id="videos"><tr><td colspan="3">A carregar…</td></tr></tbody></table></div></section>
+<section class="section"><h2>Origem das visitas</h2><div id="sources" class="empty">A carregar…</div></section>
+<section class="section"><h2>Interacções registadas</h2><div id="events" class="empty">A carregar…</div></section>
+</div><p class="status" id="status">As estatísticas só começam a contar depois de um visitante aceitar a recolha de estatísticas anónimas. Não são recolhidos nomes, e-mails ou localização exacta. As reproduções são contabilizadas quando o vídeo é reproduzido no próprio site; vídeos externos incorporados podem exigir integração específica.</p>
+</main>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.95.0';
+const db=createClient('https://jblxmqoodtfhediqegar.supabase.co','sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY');
+const $=id=>document.getElementById(id),fmt=n=>Number(n||0).toLocaleString('pt-AO');
+let valid=false;
+async function check(){
+ const {data:{session}}=await db.auth.getSession();
+ if(!session){location.replace('admin.html');return false}
+ const {data:profile,error}=await db.from('profiles').select('role,active').eq('user_id',session.user.id).maybeSingle();
+ if(error||profile?.role!=='senior_admin'||profile.active!==true){await db.auth.signOut();location.replace('admin.html?access=denied');return false}
+ valid=true;return true;
+}
+function renderBars(rows){
+ if(!rows?.length)return '<div class="empty">Ainda não há dados neste período.</div>';
+ const max=Math.max(1,...rows.map(x=>Number(x.views||x.visits||x.total||0)));
+ return rows.map(x=>{const n=Number(x.views||x.visits||x.total||0),label=x.day?new Date(x.day+'T12:00:00').toLocaleDateString('pt-AO',{day:'2-digit',month:'2-digit'}):(x.source||x.event_type);return '<div class="bar-row"><span>'+label+'</span><div class="bar"><i style="width:'+Math.max(2,n/max*100)+'%"></i></div><b>'+fmt(n)+'</b></div>'}).join('');
+}
+async function load(){
+ if(!valid)return;
+ $('status').textContent='A consultar as estatísticas…';$('status').classList.remove('error');
+ const {data,error}=await db.rpc('macovi_analytics_report',{p_days:Number($('period').value)});
+ if(error){$('status').textContent='Não foi possível carregar os dados: '+error.message;$('status').classList.add('error');return}
+ const d=data||{};
+ $('views').textContent=fmt(d.page_views);$('visitors').textContent=fmt(d.visitors);$('videoStarts').textContent=fmt(d.video_starts);$('videoCompletions').textContent=fmt(d.video_completions);$('interactions').textContent=fmt(d.interactions);
+ $('daily').innerHTML=renderBars(d.daily||[]);
+ $('pages').innerHTML=(d.top_pages||[]).map(x=>'<tr><td><strong>'+String(x.page_title||x.page_path).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</strong><br><small class="muted">'+x.page_path+'</small></td><td>'+fmt(x.views)+'</td><td>'+fmt(x.visitors)+'</td></tr>').join('')||'<tr><td colspan="3">Sem dados.</td></tr>';
+ $('videos').innerHTML=(d.videos||[]).map(x=>'<tr><td>'+String(x.video_title||x.video_id).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</td><td>'+fmt(x.starts)+'</td><td>'+fmt(x.completions)+'</td></tr>').join('')||'<tr><td colspan="3">Sem reproduções registadas.</td></tr>';
+ $('sources').innerHTML=renderBars(d.sources||[]);$('events').innerHTML=renderBars(d.event_types||[]);
+ $('updated').textContent='Actualizado: '+new Date(d.generated_at||Date.now()).toLocaleString('pt-AO');
+ $('status').textContent='Dados agregados dos últimos '+d.period_days+' dias. Sessões únicas são estimativas por navegador/dispositivo e dependem da aceitação das estatísticas.';
+}
+$('period').addEventListener('change',load);$('refresh').addEventListener('click',load);$('logout').addEventListener('click',async()=>{await db.auth.signOut();location.replace('admin.html')});
+if(await check())await load();
+</script></body></html>
