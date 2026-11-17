@@ -141,9 +141,21 @@ document.getElementById('newsRows').addEventListener('click',async e=>{
   if(error||!data){alert('Não foi possível abrir a notícia.');return;}
   editingNewsId=data.id;document.getElementById('newsTitle').value=data.title;document.getElementById('newsCategory').value=data.category;document.getElementById('newsSummary').value=data.summary||'';document.getElementById('newsBody').value=data.body;document.getElementById('newsModality').value=data.modality_id||'';document.getElementById('newsPublished').checked=data.published;document.getElementById('newsImage').value='';document.getElementById('newsVideo').value='';document.getElementById('newsCancel').hidden=false;document.getElementById('newsSave').textContent='Actualizar notícia';document.getElementById('newsMessage').textContent=(data.image_path?'A fotografia actual será mantida se não seleccionares outra. ':'')+(data.video_path?'O vídeo actual será mantido se não seleccionares outro.':'A editar publicação.');newsForm.scrollIntoView({behavior:'smooth',block:'start'});
  }
- if(del&&confirm('Eliminar definitivamente esta notícia?')){
-  const {error}=await supabase.from('news').delete().eq('id',del.dataset.newsDelete);
-  if(error)alert('Não foi possível eliminar: '+error.message);else await loadNews();
+ if(del&&confirm('Eliminar definitivamente esta notícia e os respectivos ficheiros de multimédia?')){
+  del.disabled=true;
+  try{
+   const {data:media,error:mediaError}=await supabase.from('news').select('image_path,video_path').eq('id',del.dataset.newsDelete).maybeSingle();
+   if(mediaError||!media)throw new Error(mediaError?.message||'Não foi possível localizar os ficheiros desta notícia.');
+   const {error}=await supabase.from('news').delete().eq('id',del.dataset.newsDelete);
+   if(error)throw new Error(error.message);
+   const paths=[media.image_path,media.video_path].filter(Boolean);
+   if(paths.length){
+    const {error:storageError}=await supabase.storage.from('macovi-photos').remove(paths);
+    if(storageError)showToast('Notícia eliminada, mas alguns ficheiros ficaram por remover.','error');
+   }
+   showToast('Notícia eliminada.');await loadNews();
+  }catch(error){console.error('ADMIN_NEWS_DELETE_ERROR',error);alert('Não foi possível eliminar a notícia: '+(error?.message||'erro inesperado'));}
+  finally{if(del.isConnected)del.disabled=false;}
  }
 });
 
