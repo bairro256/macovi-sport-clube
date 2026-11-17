@@ -12,6 +12,7 @@
 <div class="two">
 <section class="section"><h2>Páginas mais visitadas</h2><div class="table-wrap"><table><thead><tr><th>Página</th><th>Visitas</th><th>Sessões</th></tr></thead><tbody id="pages"><tr><td colspan="3">A carregar…</td></tr></tbody></table></div></section>
 <section class="section"><h2>Vídeos mais vistos</h2><div class="table-wrap"><table><thead><tr><th>Vídeo</th><th>Reproduções</th><th>Vistos por</th><th>Concluídos</th></tr></thead><tbody id="videos"><tr><td colspan="4">A carregar…</td></tr></tbody></table></div></section>
+<section class="section"><h2>Actividade dos visitantes (identificadores anónimos)</h2><p class="muted">Cada código representa um navegador/dispositivo que aceitou as estatísticas. Não identifica o nome real da pessoa.</p><div class="table-wrap"><table><thead><tr><th>Visitante</th><th>Primeira visita</th><th>Última actividade</th><th>Páginas</th><th>Acções</th><th>Vídeos</th></tr></thead><tbody id="visitorRows"><tr><td colspan="6">A carregar…</td></tr></tbody></table></div></section>
 <section class="section"><h2>Origem das visitas</h2><div id="sources" class="empty">A carregar…</div></section>
 <section class="section"><h2>Modalidades mais consultadas</h2><div id="modalities" class="empty">A carregar…</div></section>
 <section class="section"><h2>Interacções mais utilizadas</h2><div class="table-wrap"><table><thead><tr><th>Elemento</th><th>Tipo</th><th>Cliques</th></tr></thead><tbody id="interactionsRows"><tr><td colspan="3">A carregar…</td></tr></tbody></table></div></section>
@@ -38,7 +39,9 @@ function renderBars(rows){
 async function load(){
  if(!valid)return;
  $('status').textContent='A consultar as estatísticas…';$('status').classList.remove('error');
- const {data,error}=await db.rpc('macovi_analytics_report',{p_days:Number($('period').value)});
+ const days=Number($('period').value);
+ const [report,visitorReport]=await Promise.all([db.rpc('macovi_analytics_report',{p_days:days}),db.rpc('macovi_analytics_visitors',{p_days:days})]);
+ const {data,error}=report;
  if(error){$('status').textContent='Não foi possível carregar os dados: '+error.message;$('status').classList.add('error');return}
  const d=data||{};
  $('views').textContent=fmt(d.page_views);$('visitors').textContent=fmt(d.visitors);$('videoStarts').textContent=fmt(d.video_starts);$('videoCompletions').textContent=fmt(d.video_completions);$('interactions').textContent=fmt(d.interactions);
@@ -46,6 +49,8 @@ async function load(){
  $('pages').innerHTML=(d.top_pages||[]).map(x=>'<tr><td><strong>'+String(x.page_title||x.page_path).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</strong><br><small class="muted">'+x.page_path+'</small></td><td>'+fmt(x.views)+'</td><td>'+fmt(x.visitors)+'</td></tr>').join('')||'<tr><td colspan="3">Sem dados.</td></tr>';
  $('videos').innerHTML=(d.videos||[]).map(x=>'<tr><td>'+String(x.video_title||x.video_id).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</td><td>'+fmt(x.starts)+'</td><td>'+fmt(x.unique_viewers)+'</td><td>'+fmt(x.completions)+'</td></tr>').join('')||'<tr><td colspan="4">Sem reproduções registadas.</td></tr>';
  $('sources').innerHTML=renderBars(d.sources||[]);$('modalities').innerHTML=renderBars((d.modalities||[]).map(x=>({source:x.modality_slug,visits:x.views})));$('interactionsRows').innerHTML=(d.top_interactions||[]).map(x=>'<tr><td>'+String(x.label).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</td><td>'+x.event_type+'</td><td>'+fmt(x.total)+'</td></tr>').join('')||'<tr><td colspan="3">Sem interacções.</td></tr>';$('events').innerHTML=renderBars(d.event_types||[]);
+ const esc=x=>String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ if(visitorReport.error){$('visitorRows').innerHTML='<tr><td colspan="6">Não foi possível carregar a actividade dos visitantes.</td></tr>';}else{$('visitorRows').innerHTML=(visitorReport.data?.visitors||[]).map(x=>'<tr><td><code>'+esc(x.visitor_code.slice(0,8))+'</code></td><td>'+new Date(x.first_seen).toLocaleString('pt-AO')+'</td><td>'+new Date(x.last_seen).toLocaleString('pt-AO')+'</td><td>'+fmt(x.page_views)+'<br><small class="muted">'+(x.pages||[]).map(esc).join('<br>')+'</small></td><td>'+fmt(x.interactions)+'<br><small class="muted">'+(x.actions||[]).map(esc).join(', ')+'</small></td><td>'+fmt(x.video_starts)+'<br><small class="muted">'+(x.videos||[]).map(esc).join(', ')+'</small></td></tr>').join('')||'<tr><td colspan="6">Ainda não há visitantes que tenham aceite as estatísticas.</td></tr>';}
  $('updated').textContent='Actualizado: '+new Date(d.generated_at||Date.now()).toLocaleString('pt-AO');
  $('status').textContent='Dados agregados dos últimos '+d.period_days+' dias. Sessões únicas são estimativas por navegador/dispositivo e dependem da aceitação das estatísticas.';
 }
