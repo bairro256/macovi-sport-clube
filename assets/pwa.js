@@ -15,7 +15,7 @@ if(footer&&!footer.querySelector('.macovi-footer-social')){
 
 // Notificações Web Push: o visitante escolhe quando subscrever e pode cancelar.
 const pushOpen=holder.querySelector('#macovi-push-open'),pushCard=holder.querySelector('#macovi-push-card'),pushMessage=holder.querySelector('#macovi-push-message'),pushEnable=holder.querySelector('#macovi-push-enable'),pushDisable=holder.querySelector('#macovi-push-disable');
-const pushPublicKey='BMD9IOa4yS76tGzlMXM1T-OLBDxBW09BTaM7Y96ZVWh_YRn-pIvXNxjkrj134yVmLVsCo-l6r701P6PTx9_s1BI';
+const pushPublicKey='BPFhd8mlmI2_xZzw1-1xHHUEBY9Cxg54IAc0Qeaz84UhKGmb09Jqpx-lOTXB6O_4gMP9HoZAJJxZ9xnmxbBAVYs';
 const pushFunction='https://jblxmqoodtfhediqegar.supabase.co/functions/v1/macovi-push';
 const pushApiKey='sb_publishable_e9ohuqNh7BBIpTitCU0QmQ_6Lh7pHMY';
 function pushBytes(value){const pad='='.repeat((4-value.length%4)%4),raw=atob((value+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)));}
